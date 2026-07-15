@@ -548,7 +548,7 @@ const drinksItems = [
  { name: "SODA - WATERMELON", price: 49 }, { name: "SODA - LYCHEE", price: 49 },
  { name: "SODA - LEMON", price: 49 }, { name: "PALAMIG - GULAMAN", price: 25 },
  { name: "PALAMIG - CUCUMBER LEMONADE", price: 25 }, { name: "PALAMIG - BLUE LEMONADE", price: 25 },
- { name: "MINERAL WATER", price: 25 }
+ { name: "MINERAL WATER", price: 20 }
 ];
 
 
@@ -562,69 +562,8 @@ let kitchenPendingQueue = [];
 let itemizedDeductionsLedger = [];
 let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
 let recipeIngredientsMatrix = [];
-/* ---------- Local Storage Persistence (Crash-Proof) ---------- */
-function saveState() {
-  const state = {};
-  
-  // Only save variables if they actually exist in your code
-  if (typeof inventoryDatabaseStore !== 'undefined') state.inventoryDatabaseStore = inventoryDatabaseStore;
-  if (typeof activeBasketArray !== 'undefined') state.activeBasketArray = activeBasketArray;
-  if (typeof kitchenPendingQueue !== 'undefined') state.kitchenPendingQueue = kitchenPendingQueue;
-  if (typeof dailyReport !== 'undefined') state.dailyReport = dailyReport;
-  
-  // Only grab input values if they actually exist on your HTML screen
-  const startingCashEl = document.getElementById("starting-cash-input");
-  if (startingCashEl) state.startingCash = startingCashEl.value;
-  
-  const discountEl = document.getElementById("pos-discount-select");
-  if (discountEl) state.discountSelect = discountEl.value;
-  
-  const paymentEl = document.getElementById("pos-payment-method");
-  if (paymentEl) state.paymentMethod = paymentEl.value;
 
-  localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
-}
 
-function loadState() {
-  const savedData = localStorage.getItem("siloganNiJoy_State");
-  if (!savedData) return false;
-  
-  try {
-    const state = JSON.parse(savedData);
-    
-    // Only load variables if they exist in your code
-    if (state.inventoryDatabaseStore !== undefined && typeof inventoryDatabaseStore !== 'undefined') {
-      inventoryDatabaseStore = state.inventoryDatabaseStore;
-    }
-    if (state.activeBasketArray !== undefined && typeof activeBasketArray !== 'undefined') {
-      activeBasketArray = state.activeBasketArray;
-    }
-    if (state.kitchenPendingQueue !== undefined && typeof kitchenPendingQueue !== 'undefined') {
-      kitchenPendingQueue = state.kitchenPendingQueue;
-    }
-    if (state.dailyReport !== undefined && typeof dailyReport !== 'undefined') {
-      dailyReport = state.dailyReport;
-    }
-    
-    // Only restore input values if they exist on your HTML screen
-    if (state.startingCash !== undefined) {
-      const el = document.getElementById("starting-cash-input");
-      if (el) el.value = state.startingCash;
-    }
-    if (state.discountSelect !== undefined) {
-      const el = document.getElementById("pos-discount-select");
-      if (el) el.value = state.discountSelect;
-    }
-    if (state.paymentMethod !== undefined) {
-      const el = document.getElementById("pos-payment-method");
-      if (el) el.value = state.paymentMethod;
-    }
-    return true;
-  } catch (e) {
-    console.error("Error loading saved state:", e);
-    return false;
-  }
-}
 /* ---------- Initialization ---------- */
 window.onload = function() {
  populateSystemMasterCatalogArrays();
@@ -646,11 +585,10 @@ function populateSystemMasterCatalogArrays() {
 
 
 function initializeInventoryStorageToZero() {
-  inventoryDatabaseStore = {};
-  systemMenuCatalog.forEach(item => {
-    inventoryDatabaseStore[item.id] = { name: item.name, stockLevel: 0, unitCost: 0.00, supplierNotes: "Default Entry Base" };
-  }); 
-  saveState();
+ inventoryDatabaseStore = {};
+ systemMenuCatalog.forEach(item => {
+   inventoryDatabaseStore[item.id] = { name: item.name, stockLevel: 0, unitCost: 0.00, supplierNotes: "Default Entry Base" };
+ });
 }
 
 
@@ -736,27 +674,26 @@ function addItemToOrderBasket(menuItemId) {
    activeBasketArray.push({ id: catalogMatch.id, name: catalogMatch.name, qty: 1, price: catalogMatch.defaultPrice, category: catalogMatch.category });
  }
  recalculateBasketTotals();
- saveState(); // <--- Added here to save data on every item added
 }
+
 
 function removeBasketItemUnit(itemId) {
-  const idx = activeBasketArray.findIndex(i => i.id === itemId);
-  if (idx !== -1) {
-    if (activeBasketArray[idx].qty > 1) activeBasketArray[idx].qty--;
-    else activeBasketArray.splice(idx, 1);
-  }
-  recalculateBasketTotals();
-  saveState();
+ const idx = activeBasketArray.findIndex(i => i.id === itemId);
+ if (idx !== -1) {
+   if (activeBasketArray[idx].qty > 1) activeBasketArray[idx].qty--;
+   else activeBasketArray.splice(idx, 1);
+ }
+ recalculateBasketTotals();
 }
 
+
 function clearActiveBasket() {
-  if (confirm("Cancel current order?")) {
-    activeBasketArray = [];
-    document.getElementById("pos-discount-select").value = "0";
-    document.getElementById("pos-cash-tendered").value = "";
-    recalculateBasketTotals();
-    saveState();
-  }
+ if (confirm("Cancel current order?")) {
+   activeBasketArray = [];
+   document.getElementById("pos-discount-select").value = "0";
+   document.getElementById("pos-cash-tendered").value = "";
+   recalculateBasketTotals();
+ }
 }
 
 
@@ -804,69 +741,36 @@ function calculateChangeReturnAmount() {
 
 
 function executePOSCheckoutOrder() {
-  if (activeBasketArray.length === 0) {
-    alert("Basket is empty.");
-    return;
-  }
+ if (activeBasketArray.length === 0) {
+   alert("Basket is empty.");
+   return;
+ }
   const totalPayableText = document.getElementById("summary-grand-total").innerText.replace("PHP ", "").replace(",", "");
-  const totalPayable = parseFloat(totalPayableText) || 0;
-  const payMethod = document.getElementById("pos-payment-method").value;
-  const cashAmount = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
+ const totalPayable = parseFloat(totalPayableText) || 0;
+ const payMethod = document.getElementById("pos-payment-method").value;
+ const cashAmount = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
   if (payMethod === "cash" && cashAmount < totalPayable) {
-    alert("Insufficient cash payment amount tendered.");
-    return;
-  }
+   alert("Insufficient cash payment amount tendered.");
+   return;
+ }
   const ticketId = "SNJ-" + Math.floor(1000 + Math.random() * 9000);
-  // 1. BUILD PURE TEXT FOR RAWBT
-  let receiptText = "       SILOGAN NI JOY\n";
-  receiptText += "  POS Operational Ticket\n";
+  // 1. BUILD PURE TEXT FOR RAWBT (Bypasses Chrome's blank image bug!)
+ let receiptText = "        SILOGAN NI JOY\n";
+ receiptText += "    POS Operational Ticket\n";
+ receiptText += "================================\n";
+ receiptText += "Ticket No: " + ticketId + "\n";
+ receiptText += "Date: " + new Date().toLocaleString() + "\n";
+ receiptText += "================================\n";
+  activeBasketArray.forEach(item => {
+   receiptText += `${item.qty}x ${item.name}\n`;
+   receiptText += `               PHP ${(item.qty * item.price).toFixed(2)}\n`;
+ });
   receiptText += "================================\n";
-  receiptText += "Ticket No: " + ticketId + "\n";
-  receiptText += "Date: " + new Date().toLocaleString() + "\n";
-  receiptText += "================================\n";
-  activeBasketArray.forEach(item => {  
-    receiptText += `${item.qty}x ${item.name}\n`;
-    receiptText += `    PHP ${(item.qty * item.price).toFixed(2)}\n`;
-  });
-  receiptText += "================================\n";
-  receiptText += "TOTAL DUE:     PHP " + totalPayable.toFixed(2) + "\n";
-  receiptText += "CASH TENDERED: PHP " + cashAmount.toFixed(2) + "\n";
-  receiptText += "CHANGE:        PHP " + Math.max(0, cashAmount - totalPayable).toFixed(2) + "\n";
-  receiptText += "================================\n";
-  receiptText += "  Thank you for dining with us!\n\n\n\n";
-
-  // 2. LOGIC FOR INVENTORY & REPORTING
-  activeBasketArray.forEach(row => {
-    if (inventoryDatabaseStore[row.id]) {
-      inventoryDatabaseStore[row.id].stockLevel = Math.max(0, inventoryDatabaseStore[row.id].stockLevel - row.qty);
-    }
-    if (row.category === "Silog Menu" && inventoryDatabaseStore["ING_EGG"]) {
-      inventoryDatabaseStore["ING_EGG"].stockLevel = Math.max(0, inventoryDatabaseStore["ING_EGG"].stockLevel - row.qty);
-    }
-    dailyReport.itemsSold[row.name] = (dailyReport.itemsSold[row.name] || 0) + row.qty;
-  });
-  dailyReport.totalSales += totalPayable;
-  if (payMethod === "cash") dailyReport.cashSales += totalPayable;
-  else dailyReport.onlineSales += totalPayable;
-  dailyReport.orderCount++;
-  kitchenPendingQueue.push({
-    ticketId: ticketId,
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    items: JSON.parse(JSON.stringify(activeBasketArray))
-  });
-  // Reset UI Basket
-  activeBasketArray = [];
-  document.getElementById("pos-discount-select").value = "0";
-  document.getElementById("pos-cash-tendered").value = "";
-  recalculateBasketTotals();
-  renderKitchenQueueUI();
-  refreshInventoryTableUI();
-  updateFinancialUI();
-  saveState();
-
-  // 3. SEND DIRECTLY TO RAWBT VIA APP SCHEME
-  window.location.href = "rawbt:" + encodeURIComponent(receiptText);
-}
+ receiptText += "TOTAL DUE:     PHP " + totalPayable.toFixed(2) + "\n";
+ receiptText += "CASH TENDERED: PHP " + cashAmount.toFixed(2) + "\n";
+ receiptText += "CHANGE:        PHP " + Math.max(0, cashAmount - totalPayable).toFixed(2) + "\n";
+ receiptText += "================================\n";
+ receiptText += "  Thank you for dining with us!\n\n\n\n";
 
 
  // 2. LOGIC FOR INVENTORY & REPORTING
@@ -927,28 +831,31 @@ function renderKitchenQueueUI() {
 
 
 function markOrderAsServed(ticketId) {
-  const index = kitchenPendingQueue.findIndex(ticket => ticket.ticketId === ticketId);
+ // Find the index of the ticket in the queue array
+ const index = kitchenPendingQueue.findIndex(ticket => ticket.ticketId === ticketId);
   if (index !== -1) {
-    kitchenPendingQueue.splice(index, 1);
-    renderKitchenQueueUI();
-    saveState();
-  }
+   // Remove the ticket from the array
+   kitchenPendingQueue.splice(index, 1);
+  
+   // Refresh the UI to show the updated queue and badge count
+   renderKitchenQueueUI();
+ }
 }
 /* ---------- Financials & Ledger ---------- */
 function updateFinancialUI() {
-  document.getElementById("ui-total-sales").innerText = `PHP ${dailyReport.totalSales.toFixed(2)}`;
-  document.getElementById("ui-cash-sales").innerText = `PHP ${dailyReport.cashSales.toFixed(2)}`;
-  document.getElementById("ui-online-sales").innerText = `PHP ${dailyReport.onlineSales.toFixed(2)}`;
-  const totalDeductions = itemizedDeductionsLedger.reduce((s, r) => s + (r.amount || 0), 0); 
-  document.getElementById("ui-total-deductions").innerText = `PHP ${totalDeductions.toFixed(2)}`;
+ document.getElementById("ui-total-sales").innerText = `PHP ${dailyReport.totalSales.toFixed(2)}`;
+ document.getElementById("ui-cash-sales").innerText = `PHP ${dailyReport.cashSales.toFixed(2)}`;
+ document.getElementById("ui-online-sales").innerText = `PHP ${dailyReport.onlineSales.toFixed(2)}`;
+  const totalDeductions = itemizedDeductionsLedger.reduce((s, r) => s + (r.amount || 0), 0);
+ document.getElementById("ui-total-deductions").innerText = `PHP ${totalDeductions.toFixed(2)}`;
   const startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
-  const netCash = startingCash + dailyReport.cashSales - totalDeductions;
-  document.getElementById("financial-net-cash").innerText = `PHP ${netCash.toFixed(2)}`;
+ const netCash = startingCash + dailyReport.cashSales - totalDeductions;
+ document.getElementById("financial-net-cash").innerText = `PHP ${netCash.toFixed(2)}`;
   document.getElementById("ui-order-count").innerText = `${dailyReport.orderCount}`;
   refreshSummarizedOrdersUI();
-  refreshDeductionsUI();
-  saveState();
+ refreshDeductionsUI();
 }
+
 
 function applyManualFinancialAdjustment() {
  const target = document.getElementById("adj-metric-target").value;
@@ -984,20 +891,19 @@ function addNewDeductionEntry() {
 
 
 function refreshSummarizedOrdersUI() {
-  const container = document.getElementById("ui-summarized-orders"); 
-  if (!container) return;
-  container.innerHTML = "";
-  let html = "";
-  for (const [key, value] of Object.entries(dailyReport.itemsSold)) {
-    html += `<tr>
-      <td>${key}</td>
-      <td style="text-align: right;"><strong>${value}</strong> units</td>
-    </tr>`;
-  }
-  if (html === "") {
-    html = `<tr><td colspan="2" style="text-align:center; color:#888; padding: 10px;">No sales volumes recorded yet today.</td></tr>`;
-  }
-  container.innerHTML = html;
+ const tbody = document.getElementById("summarized-orders-display-body");
+ tbody.innerHTML = "";
+ const items = dailyReport.itemsSold;
+ const keys = Object.keys(items);
+  if (keys.length === 0) {
+   tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>';
+   return;
+ }
+  keys.forEach(name => {
+   const tr = document.createElement("tr");
+   tr.innerHTML = `<td>${name}</td><td>${items[name]}</td><td><button onclick="void(0)">—</button></td>`;
+   tbody.appendChild(tr);
+ });
 }
 
 
@@ -1068,14 +974,13 @@ function triggerReportPDFGeneration() {
 
 
 function resetEntireDailyMasterReport() {
-  if (!confirm('Reset all daily financial data?')) return;
-  dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
-  itemizedDeductionsLedger = [];
-  kitchenPendingQueue = []; 
-  updateFinancialUI();
-  renderKitchenQueueUI();
-  refreshInventoryTableUI();
-  saveState();
+ if (!confirm('Reset all daily financial data?')) return;
+ dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
+ itemizedDeductionsLedger = [];
+ kitchenPendingQueue = [];
+ updateFinancialUI();
+ renderKitchenQueueUI();
+ refreshInventoryTableUI();
 }
 
 
@@ -1117,36 +1022,34 @@ function filterInventoryDisplay(mode) {
 
 
 function executeSmartStockControllerUpdate() {
-  const target = document.getElementById("inventory-target-select").value;
-  const mode = document.getElementById("inventory-action-type").value;
-  const qty = parseInt(document.getElementById("inventory-qty-input").value) || 0;
-  const cost = parseFloat(document.getElementById("inventory-cost-input").value) || 0;
-  const notes = document.getElementById("inventory-notes-input").value || '';
+ const target = document.getElementById("inventory-target-select").value;
+ const mode = document.getElementById("inventory-action-type").value;
+ const qty = parseInt(document.getElementById("inventory-qty-input").value) || 0;
+ const cost = parseFloat(document.getElementById("inventory-cost-input").value) || 0;
+ const notes = document.getElementById("inventory-notes-input").value || '';
   if (!target) return alert('Select inventory row');
-  if (mode === 'add') inventoryDatabaseStore[target].stockLevel += qty;
-  else inventoryDatabaseStore[target].stockLevel = Math.max(0, inventoryDatabaseStore[target].stockLevel - qty);
+ if (mode === 'add') inventoryDatabaseStore[target].stockLevel += qty;
+ else inventoryDatabaseStore[target].stockLevel = Math.max(0, inventoryDatabaseStore[target].stockLevel - qty);
   inventoryDatabaseStore[target].unitCost = cost;
-  inventoryDatabaseStore[target].supplierNotes = notes || inventoryDatabaseStore[target].supplierNotes;
+ inventoryDatabaseStore[target].supplierNotes = notes || inventoryDatabaseStore[target].supplierNotes;
   refreshInventoryTableUI();
-  saveState();
 }
 
 
 /* ---------- Recipes ---------- */
 function appendCostingIngredientRow() {
-  const dish = document.getElementById("recipe-dish-target").value;
-  const ing = document.getElementById("recipe-ing-name").value || '';
-  const bulkCost = parseFloat(document.getElementById("recipe-bulk-cost").value) || 0;
-  const yieldPortions = parseFloat(document.getElementById("recipe-bulk-yield").value) || 1;
+ const dish = document.getElementById("recipe-dish-target").value;
+ const ing = document.getElementById("recipe-ing-name").value || '';
+ const bulkCost = parseFloat(document.getElementById("recipe-bulk-cost").value) || 0;
+ const yieldPortions = parseFloat(document.getElementById("recipe-bulk-yield").value) || 1;
   if (!dish || !ing || bulkCost <= 0 || yieldPortions <= 0) return alert('Complete ingredient info');
   const unitCost = bulkCost / yieldPortions;
-  recipeIngredientsMatrix.push({ dish, ingredient: ing, unitCost });
+ recipeIngredientsMatrix.push({ dish, ingredient: ing, unitCost });
   recomputeRecipeAnalyticsGains();
-  renderRecipeIngredientsUI();
+ renderRecipeIngredientsUI();
   document.getElementById("recipe-ing-name").value = '';
-  document.getElementById("recipe-bulk-cost").value = '';
-  document.getElementById("recipe-bulk-yield").value = '';
-  saveState();
+ document.getElementById("recipe-bulk-cost").value = '';
+ document.getElementById("recipe-bulk-yield").value = '';
 }
 
 
@@ -1236,5 +1139,6 @@ function printFinancialSummaryRawBT() {
 </script>
 </body>
 </html>
+
 
 
