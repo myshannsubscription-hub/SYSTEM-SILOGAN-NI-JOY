@@ -563,6 +563,48 @@ let itemizedDeductionsLedger = [];
 let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
 let recipeIngredientsMatrix = [];
 
+ /* ---------- Local Storage Persistence ---------- */
+function saveState() {
+  var startCashEl = document.getElementById("starting-cash-input");
+  var discSelEl = document.getElementById("pos-discount-select");
+  var payMethEl = document.getElementById("pos-payment-method");
+  var targMargEl = document.getElementById("recipe-target-margin");
+
+  var state = {
+    inventoryDatabaseStore: inventoryDatabaseStore,
+    activeBasketArray: activeBasketArray,
+    kitchenPendingQueue: kitchenPendingQueue,
+    itemizedDeductionsLedger: itemizedDeductionsLedger,
+    dailyReport: dailyReport,
+    recipeIngredientsMatrix: recipeIngredientsMatrix,
+    startingCash: startCashEl ? startCashEl.value : "1000",
+    discountSelect: discSelEl ? discSelEl.value : "0",
+    paymentMethod: payMethEl ? payMethEl.value : "cash",
+    targetMargin: targMargEl ? targMargEl.value : "60"
+  };
+  localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
+}
+ 
+function loadState() {
+  const savedData = localStorage.getItem("siloganNiJoy_State");
+  if (savedData) {
+    const state = JSON.parse(savedData);
+    inventoryDatabaseStore = state.inventoryDatabaseStore || {};
+    activeBasketArray = state.activeBasketArray || [];
+    kitchenPendingQueue = state.kitchenPendingQueue || [];
+    itemizedDeductionsLedger = state.itemizedDeductionsLedger || [];
+    dailyReport = state.dailyReport || { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
+    recipeIngredientsMatrix = state.recipeIngredientsMatrix || [];
+    
+    if (state.startingCash !== undefined && document.getElementById("starting-cash-input")) document.getElementById("starting-cash-input").value = state.startingCash;
+    if (state.discountSelect !== undefined && document.getElementById("pos-discount-select")) document.getElementById("pos-discount-select").value = state.discountSelect;
+    if (state.paymentMethod !== undefined && document.getElementById("pos-payment-method")) document.getElementById("pos-payment-method").value = state.paymentMethod;
+    if (state.targetMargin !== undefined && document.getElementById("recipe-target-margin")) document.getElementById("recipe-target-margin").value = state.targetMargin;
+    return true;
+  }
+  return false;
+}
+
 
 /* ---------- Initialization ---------- */
 window.onload = function() {
