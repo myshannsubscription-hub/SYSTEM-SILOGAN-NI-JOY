@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Silogan ni Joy - POS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Silogan ni Joy POS</title>
 <style>
+
+
+ @media print {
+ * {
+   color: #000000 !important;
+   background: #ffffff !important;
+   opacity: 1 !important;
+ }
+}
 /* Business Color Palette: Red (#bc1c24), Yellow (#f9bd15), Orange (#ff6600), Dark Charcoal (#222) */
 :root {
  --red: #bc1c24;
@@ -20,8 +29,6 @@ body {
  background: var(--bg);
  color: var(--dark);
 }
-
-
 /* Header */
 .header-banner {
  background: var(--red);
@@ -94,7 +101,7 @@ h3 {
  padding-bottom: 5px;
 }
 .menu-category-title {
- grid-column: 1 / -1;
+ grid-column: 1/-1;
  background: var(--orange);
  color: white;
  padding: 6px 12px;
@@ -212,22 +219,16 @@ button.secondary-btn:hover { background: #444; }
 
 /* Standard Master Data Tables */
 .master-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.master-table th, .master-table td { border: 1px solid #e0d9c6; padding: 10px; text-align: left; font-size: 13px; }
+.master-table th, .master-table td { border: 1px solid #e0d9c6; padding: 10px; font-size: 13px; text-align: left; }
 .master-table th { background: var(--dark); color: white; }
 .master-table tr:nth-child(even) { background-color: #fffdf9; }
-
-
 .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; }
 .badge.bg-danger { background-color: var(--red); }
 .badge.bg-warning { background-color: var(--orange); color: var(--dark); }
 .badge.bg-success { background-color: #28a745; }
-
-
 .filter-row { display: flex; gap: 10px; margin-bottom: 15px; }
 .filter-row button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; }
 .filter-row button.active-filter { background: var(--orange); color: white; border-color: var(--orange); }
-
-
 .costing-summary-box {
  background: #f7f9fa;
  border: 1px solid #ced4da;
@@ -244,35 +245,32 @@ button.secondary-btn:hover { background: #444; }
 /* Print rules */
 @media print {
  /* Hide everything by default, then selectively show print areas */
- body * { display: none !important; }
- body.print-mode-receipt #receipt-print-area,
+ body > * { display: none !important; }
+  body.print-mode-receipt #receipt-print-area,
  body.print-mode-receipt #receipt-print-area * {
    display: block !important;
    visibility: visible !important;
  }
- body.print-mode-report #report-print-area,
+  body.print-mode-report #report-print-area,
  body.print-mode-report #report-print-area * {
    display: block !important;
    visibility: visible !important;
  }
-
-
- /* Receipt profile */
+  /* Receipt profile */
  body.print-mode-receipt #receipt-print-area {
    position: absolute !important;
    left: 0 !important; top: 0 !important;
    width: 70mm !important; max-width: 70mm !important;
    padding: 2mm !important;
-   font-family: monospace !important; font-size: 11px !important;
+   font-family: monospace !important;
    box-sizing: border-box !important;
    background: #fff !important; color: #000 !important;
+   font-size: 11px !important;
  }
  body.print-mode-receipt .receipt-line { border-top: 1px dashed #000 !important; margin: 5px 0 !important; width: 100% !important; display: block !important; }
  body.print-mode-receipt .receipt-row { display: flex !important; justify-content: space-between !important; width: 100% !important; gap: 4px !important; }
  body.print-mode-receipt .center-text { text-align: center !important; width: 100% !important; display: block !important; }
-
-
- /* Report profile */
+  /* Report profile */
  body.print-mode-report #report-print-area {
    display: block !important;
    width: 100% !important;
@@ -287,10 +285,12 @@ button.secondary-btn:hover { background: #444; }
  body.print-mode-report table { width: 100% !important; border-collapse: collapse !important; }
  body.print-mode-report th { background-color: var(--dark) !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
  body.print-mode-report td, body.print-mode-report th { border: 1px solid #ddd !important; padding: 8px !important; }
- @page { size: auto; margin: 10mm; }
 }
+@page { size: auto; margin: 10mm; }
 </style>
 </head>
+
+
 <body>
 <div class="header-banner">
  <h2>Silogan ni Joy</h2>
@@ -307,63 +307,48 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-<!-- POS Section -->
 <div id="pos-section" class="app-section active-section">
  <div class="grid-2col">
    <div>
      <h3>Interactive Menu Layout</h3>
      <div id="pos-menu-grid" class="grid-cards"></div>
    </div>
-
-
    <div class="order-basket">
      <h3>Order Basket</h3>
-     <div style="max-height:220px; overflow-y:auto; margin-bottom:10px;">
+     <div style="max-height: 220px; overflow-y:auto; margin-bottom:10px;">
        <table class="basket-table">
          <thead>
            <tr><th>Item Name</th><th>Qty</th><th>Price</th><th>Action</th></tr>
          </thead>
          <tbody id="basket-entries">
-           <tr><td colspan="4" style="text-align:center; color:#888;">Order basket is completely empty.</td></tr>
+           <tr><td colspan="4" style="text-align:center; color: #888;">Order basket is completely empty.</td></tr>
          </tbody>
        </table>
      </div>
-
-
-     <div class="basket-summary-row"><span>Subtotal :</span><span id="summary-subtotal">PHP 0.00</span></div>
-
-
+     <div class="basket-summary-row"><span>Subtotal:</span><span id="summary-subtotal">PHP 0.00</span></div>
      <div class="basket-summary-row">
        <label for="pos-discount-select" style="font-size:13px;">Deduction Profile :</label>
        <select id="pos-discount-select" style="width:55%;" onchange="recalculateBasketTotals()">
-         <option value="0">None (0%)</option>
+         <option value="0">None (0%) </option>
          <option value="5">Highest Item Only (5%)</option>
        </select>
      </div>
-
-
-     <div class="basket-summary-row"><span>Discount Value :</span><span id="summary-discount">PHP 0.00</span></div>
-     <div class="basket-summary-row grand-total"><span>Amount Due :</span><span id="summary-grand-total">PHP 0.00</span></div>
-
-
-     <div style="margin-top:15px; background:#eee; padding:10px; border-radius:5px;">
-       <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:2px;">Payment Method :</label>
+     <div class="basket-summary-row"><span>Discount Value:</span><span id="summary-discount">PHP 0.00</span></div>
+     <div class="basket-summary-row grand-total"><span>Amount Due:</span><span id="summary-grand-total">PHP 0.00</span></div>
+    
+     <div style="margin-top: 15px; background:#eee; padding:10px; border-radius: 5px;">
+       <label style="font-size: 12px; font-weight:bold; display:block; margin-bottom:2px;">Payment Method : </label>
        <select id="pos-payment-method">
          <option value="cash">Cash</option>
          <option value="online">Online</option>
        </select>
-
-
-       <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:2px;">Cash Received from Customer :</label>
+       <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:2px;">Cash Received from Customer: </label>
        <input type="number" id="pos-cash-tendered" placeholder="0.00" oninput="calculateChangeReturnAmount()">
-
-
-       <div class="basket-summary-row" style="font-weight:bold; margin-top:5px;">
-         <span>Change Due :</span><span id="pos-change-due">PHP 0.00</span>
+       <div class="basket-summary-row" style="font-weight:bold; margin-top: 5px;">
+         <span>Change Due:</span><span id="pos-change-due">PHP 0.00</span>
        </div>
      </div>
-
-
+    
      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip & Print</button>
      <button class="action-btn secondary-btn" onclick="clearActiveBasket()">Cancel Order</button>
    </div>
@@ -371,25 +356,19 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-<!-- Orders Section -->
 <div id="orders-section" class="app-section">
  <h3>Kitchen Prep Pending Order Ticket Line</h3>
  <div id="kitchen-queue-display" class="order-queue-grid"></div>
 </div>
 
 
-<!-- Financials Section -->
 <div id="financials-section" class="app-section">
  <h3>Daily Business Metrics Summary Board</h3>
-
-
- <div style="background:#fdfbf7; padding:15px; border-radius:6px; margin-bottom:20px; border:1px solid #e6dfcc;">
-   <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash):</label>
+  <div style="background:#fdfbf7; padding:15px; border-radius: 6px; margin-bottom:20px; border:1px solid #e6dfcc;">
+   <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
    <input type="number" id="starting-cash-input" value="1000" style="width:200px; display:inline-block; margin:0 10px;" oninput="updateFinancialUI()">
  </div>
-
-
- <div class="financial-metric-grid">
+  <div class="financial-metric-grid">
    <div class="financial-card highlight"><h4>Gross Sales (Combined)</h4><p id="ui-total-sales">PHP 0.00</p></div>
    <div class="financial-card"><h4>Cash Sales Revenue</h4><p id="ui-cash-sales">PHP 0.00</p></div>
    <div class="financial-card"><h4>Online Sales Revenue</h4><p id="ui-online-sales">PHP 0.00</p></div>
@@ -397,13 +376,11 @@ button.secondary-btn:hover { background: #444; }
    <div class="financial-card highlight"><h4>Net Cash on Hand</h4><p id="financial-net-cash">PHP 1000.00</p></div>
    <div class="financial-card"><h4>Transactions Served</h4><p id="ui-order-count">0</p></div>
  </div>
-
-
- <div class="grid-2col" style="margin-top:25px;">
+  <div class="grid-2col" style="margin-top:25px;">
    <div>
-     <div style="background:#fffbf0; border:1px dashed var(--orange); padding:15px; border-radius:6px; margin-bottom:20px;">
+     <div style="background:#fffbf0; border:1px dashed var(--orange); padding:15px; border-radius: 6px; margin-bottom:20px;">
        <h4 style="margin-top:0; color:var(--orange);">Manual Summary Counters Overrides</h4>
-       <label style="font-size:12px; font-weight:bold;">Select Counter Vector :</label>
+       <label style="font-size: 12px; font-weight:bold;">Select Counter Vector :</label>
        <select id="adj-metric-target" style="padding:6px; margin-bottom:8px;">
          <option value="totalSales_add">Add to Combined Gross Sales</option>
          <option value="totalSales_sub">Subtract from Combined Gross Sales</option>
@@ -418,8 +395,7 @@ button.secondary-btn:hover { background: #444; }
        <input type="number" id="adj-metric-value" placeholder="0.00" style="padding:6px; margin-bottom:8px;">
        <button class="action-btn" style="background:var(--orange); padding:8px; margin:0;" onclick="applyManualFinancialAdjustment()">Apply Override</button>
      </div>
-
-
+    
      <h3>Record Operating Expense / Payout</h3>
      <label>Deduction Stream Line :</label>
      <select id="expense-type-select">
@@ -434,8 +410,7 @@ button.secondary-btn:hover { background: #444; }
      <input type="number" id="expense-amount-input" placeholder="0.00">
      <button class="action-btn" onclick="addNewDeductionEntry()">Log Expense Line Item</button>
    </div>
-
-
+  
    <div>
      <h3>Summarized Orders (All Sales Volumes)</h3>
      <div style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #e0d9c6; border-radius:4px;">
@@ -444,8 +419,7 @@ button.secondary-btn:hover { background: #444; }
          <tbody id="summarized-orders-display-body"><tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr></tbody>
        </table>
      </div>
-
-
+    
      <h3>Itemized Ledger Audit Log</h3>
      <div style="max-height:200px; overflow-y:auto;">
        <table class="master-table">
@@ -455,16 +429,15 @@ button.secondary-btn:hover { background: #444; }
      </div>
    </div>
  </div>
-
-
- <div style="margin-top:30px; display:flex; gap:15px;">
-   <button type="button" class="action-btn" style="background:#28a745;" onclick="triggerReportPDFGeneration()">Save Financial Summary to PDF</button>
-   <button class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
- </div>
+ <div style="margin-top:30px; display:flex; gap:15px; flex-wrap: wrap;">
+ <!-- Fixed Print Button -->
+ <button type="button" class="action-btn" style="background:#28a745;" onclick="printFinancialSummaryRawBT()">Print Summary</button>
+ <button type="button" class="action-btn" style="background:#17a2b8;" onclick="downloadFinancialSummaryPDF()">Download PDF File</button>
+ <button type="button" class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
+</div>
 </div>
 
 
-<!-- Inventory Section -->
 <div id="inventory-section" class="app-section">
  <h3>Master System Stock Controller</h3>
  <div class="filter-row">
@@ -472,9 +445,7 @@ button.secondary-btn:hover { background: #444; }
    <button id="filter-btn-low" onclick="filterInventoryDisplay('low')">Low Stock Alerts (&lt; 10)</button>
    <button id="filter-btn-out" onclick="filterInventoryDisplay('out')">Out of Stock Alert (0)</button>
  </div>
-
-
- <div class="grid-2col">
+  <div class="grid-2col">
    <div>
      <div style="max-height:500px; overflow-y:auto;">
        <table class="master-table">
@@ -483,8 +454,7 @@ button.secondary-btn:hover { background: #444; }
        </table>
      </div>
    </div>
-
-
+  
    <div style="background:#fffdf6; padding:20px; border-radius:6px; border:2px dashed var(--yellow);">
      <h3>Modify Active Stock Parameters</h3>
      <label>Select Target Inventory Row :</label>
@@ -506,7 +476,6 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-<!-- Recipe Section -->
 <div id="recipe-section" class="app-section">
  <h3>Recipe Component Costing & Profit Margin Projection Module</h3>
  <div class="grid-2col">
@@ -521,8 +490,7 @@ button.secondary-btn:hover { background: #444; }
      <label>Yield Output Portions Per Package (Servings) :</label>
      <input type="number" id="recipe-bulk-yield" placeholder="1">
      <button class="action-btn" onclick="appendCostingIngredientRow()">Add Ingredient to Recipe Log</button>
-
-
+    
      <div class="costing-summary-box">
        <h4>Calculated Pricing Target Projections</h4>
        <p>Aggregated Ingredient Base Cost: <span id="calc-base-cost" style="font-weight:bold; color:var(--red);">PHP 0.00</span></p>
@@ -531,8 +499,7 @@ button.secondary-btn:hover { background: #444; }
        <p>Proposed Suggested Retail Value Level: <span id="calc-suggested-price" style="font-weight:bold; color:#28a745;">PHP 0.00</span></p>
      </div>
    </div>
-
-
+  
    <div>
      <h3>Active Recipe Structural Line Breakdown</h3>
      <div style="max-height:400px; overflow-y:auto;">
@@ -546,7 +513,6 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-<!-- Hidden print areas -->
 <div id="receipt-print-area" aria-hidden="true"></div>
 <div id="report-print-area" aria-hidden="true"></div>
 
@@ -556,14 +522,14 @@ button.secondary-btn:hover { background: #444; }
 const silogItems = [
  { name: "ADOBO SILOG", price: 149 }, { name: "BAGNET SILOG", price: 159 },
  { name: "BANGUS SILOG", price: 159 }, { name: "BANGUS TAPA SILOG", price: 129 },
- { name: "BANGUS TOCINO SILOG", price: 129 }, { name: "BURGER STEAK SILOG", price: 159 },
- { name: "CHICKEN PASTIL SILOG", price: 99 }, { name: "CORN BEEF SILOG", price: 129 },
- { name: "DINAKDAKAN SILOG", price: 159 }, { name: "HAMSILOG", price: 99 },
- { name: "HOTDOG SILOG", price: 99 }, { name: "HUNGARIAN SILOG", price: 159 },
- { name: "LIEMPO SILOG", price: 159 }, { name: "LONGGANISA SILOG", price: 149 },
- { name: "NUGGET SILOG", price: 99 }, { name: "SISIG SILOG", price: 159 },
- { name: "SKINLESS SILOG", price: 99 }, { name: "SPAM SILOG", price: 149 },
- { name: "TAPA SILOG", price: 149 }, { name: "TOCINO SILOG", price: 149 }
+ { name: "BANGUS TOCINO SILOG", price: 129 }, { name: "BURGER STEAK SILOG", price: 159 }, { name: "CHICKEN PASTIL SILOG", price: 99 },
+ { name: "CORN BEEF SILOG", price: 129 }, { name: "DINAKDAKAN SILOG", price: 159 },
+ { name: "HAMSILOG", price: 99 }, { name: "HOTDOG SILOG", price: 99 },
+ { name: "HUNGARIAN SILOG", price: 159 }, { name: "LIEMPO SILOG", price: 159 },
+ { name: "LONGGANISA SILOG", price: 149 }, { name: "NUGGET SILOG", price: 99 },
+ { name: "SISIG SILOG", price: 159 }, { name: "SKINLESS SILOG", price: 99 },
+ { name: "SPAM SILOG", price: 149 }, { name: "TAPA SILOG", price: 149 },
+ { name: "TOCINO SILOG", price: 149 }
 ];
 
 
@@ -588,64 +554,83 @@ const drinksItems = [
 
 let systemMenuCatalog = [];
 let itemIndexCounter = 1;
+let inventoryDatabaseStore = {};
 
 
 let activeBasketArray = [];
 let kitchenPendingQueue = [];
 let itemizedDeductionsLedger = [];
+let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
 let recipeIngredientsMatrix = [];
- /* ---------- Local Storage Persistence ---------- */
+/* ---------- Local Storage Persistence (Crash-Proof) ---------- */
 function saveState() {
-  const state = {
-    inventoryDatabaseStore,
-    activeBasketArray,
-    kitchenPendingQueue,
-    itemizedDeductionsLedger,
-    dailyReport,
-    recipeIngredientsMatrix,
-    startingCash: document.getElementById("starting-cash-input")?.value || "1000",
-    discountSelect: document.getElementById("pos-discount-select")?.value || "0",
-    paymentMethod: document.getElementById("pos-payment-method")?.value || "cash",
-    targetMargin: document.getElementById("recipe-target-margin")?.value || "60"
-  };
+  const state = {};
+  
+  // Only save variables if they actually exist in your code
+  if (typeof inventoryDatabaseStore !== 'undefined') state.inventoryDatabaseStore = inventoryDatabaseStore;
+  if (typeof activeBasketArray !== 'undefined') state.activeBasketArray = activeBasketArray;
+  if (typeof kitchenPendingQueue !== 'undefined') state.kitchenPendingQueue = kitchenPendingQueue;
+  if (typeof dailyReport !== 'undefined') state.dailyReport = dailyReport;
+  
+  // Only grab input values if they actually exist on your HTML screen
+  const startingCashEl = document.getElementById("starting-cash-input");
+  if (startingCashEl) state.startingCash = startingCashEl.value;
+  
+  const discountEl = document.getElementById("pos-discount-select");
+  if (discountEl) state.discountSelect = discountEl.value;
+  
+  const paymentEl = document.getElementById("pos-payment-method");
+  if (paymentEl) state.paymentMethod = paymentEl.value;
+
   localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
 }
 
 function loadState() {
   const savedData = localStorage.getItem("siloganNiJoy_State");
-  if (savedData) {
+  if (!savedData) return false;
+  
+  try {
     const state = JSON.parse(savedData);
-    inventoryDatabaseStore = state.inventoryDatabaseStore || {};
-    activeBasketArray = state.activeBasketArray || [];
-    kitchenPendingQueue = state.kitchenPendingQueue || [];
-    itemizedDeductionsLedger = state.itemizedDeductionsLedger || [];
-    dailyReport = state.dailyReport || { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
-    recipeIngredientsMatrix = state.recipeIngredientsMatrix || [];
     
-    if (state.startingCash !== undefined && document.getElementById("starting-cash-input")) document.getElementById("starting-cash-input").value = state.startingCash;
-    if (state.discountSelect !== undefined && document.getElementById("pos-discount-select")) document.getElementById("pos-discount-select").value = state.discountSelect;
-    if (state.paymentMethod !== undefined && document.getElementById("pos-payment-method")) document.getElementById("pos-payment-method").value = state.paymentMethod;
-    if (state.targetMargin !== undefined && document.getElementById("recipe-target-margin")) document.getElementById("recipe-target-margin").value = state.targetMargin;
+    // Only load variables if they exist in your code
+    if (state.inventoryDatabaseStore !== undefined && typeof inventoryDatabaseStore !== 'undefined') {
+      inventoryDatabaseStore = state.inventoryDatabaseStore;
+    }
+    if (state.activeBasketArray !== undefined && typeof activeBasketArray !== 'undefined') {
+      activeBasketArray = state.activeBasketArray;
+    }
+    if (state.kitchenPendingQueue !== undefined && typeof kitchenPendingQueue !== 'undefined') {
+      kitchenPendingQueue = state.kitchenPendingQueue;
+    }
+    if (state.dailyReport !== undefined && typeof dailyReport !== 'undefined') {
+      dailyReport = state.dailyReport;
+    }
+    
+    // Only restore input values if they exist on your HTML screen
+    if (state.startingCash !== undefined) {
+      const el = document.getElementById("starting-cash-input");
+      if (el) el.value = state.startingCash;
+    }
+    if (state.discountSelect !== undefined) {
+      const el = document.getElementById("pos-discount-select");
+      if (el) el.value = state.discountSelect;
+    }
+    if (state.paymentMethod !== undefined) {
+      const el = document.getElementById("pos-payment-method");
+      if (el) el.value = state.paymentMethod;
+    }
     return true;
+  } catch (e) {
+    console.error("Error loading saved state:", e);
+    return false;
   }
-  return false;
 }
-let inventoryDatabaseStore = {};
-let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
-
-
 /* ---------- Initialization ---------- */
 window.onload = function() {
-  populateSystemMasterCatalogArrays();
-  const hasSavedState = loadState(); // Attempt to load saved data
-  if (!hasSavedState) {
-    initializeInventoryStorageToZero(); // Only reset to zero if no save exists
-  }
-  refreshAllUI();
-  recalculateBasketTotals();
-  renderKitchenQueueUI();
-  if (recipeIngredientsMatrix.length > 0) renderRecipeIngredientsUI();
-  recomputeRecipeAnalyticsGains();
+ populateSystemMasterCatalogArrays();
+ initializeInventoryStorageToZero();
+ refreshAllUI();
+ // BUG FIX: Removed the conflicting window.addEventListener('afterprint')
 };
 
 
@@ -673,13 +658,14 @@ function initializeInventoryStorageToZero() {
 function switchAppTab(targetSectionId) {
  document.querySelectorAll('.app-section').forEach(viewPanel => viewPanel.classList.remove('active-section'));
  document.querySelectorAll('.tab-button').forEach(tabButton => tabButton.classList.remove('active-tab'));
-
-
  document.getElementById(targetSectionId).classList.add('active-section');
- const tabs = document.querySelectorAll('.navigation-tabs button');
+  const tabs = document.querySelectorAll('.navigation-tabs button');
  if (targetSectionId === 'pos-section') tabs[0].classList.add('active-tab');
  if (targetSectionId === 'orders-section') tabs[1].classList.add('active-tab');
- if (targetSectionId === 'financials-section') { tabs[2].classList.add('active-tab'); updateFinancialUI(); }
+ if (targetSectionId === 'financials-section') {
+   tabs[2].classList.add('active-tab');
+   updateFinancialUI();
+ }
  if (targetSectionId === 'inventory-section') tabs[3].classList.add('active-tab');
  if (targetSectionId === 'recipe-section') tabs[4].classList.add('active-tab');
 }
@@ -699,31 +685,37 @@ function repopulateMasterDropdownSelections() {
 }
 
 
+function refreshAllUI() {
+ renderInteractivePOSMenuUI();
+ repopulateMasterDropdownSelections();
+ refreshInventoryTableUI();
+ updateFinancialUI();
+}
+
+
 /* ---------- POS Menu Rendering ---------- */
 function renderInteractivePOSMenuUI() {
  const displayContainer = document.getElementById("pos-menu-grid");
  displayContainer.innerHTML = "";
- let lastSeenCategory = "";
- systemMenuCatalog.forEach(dishItem => {
-   if (dishItem.category === "Ingredients") return;
-   if (dishItem.category !== lastSeenCategory) {
-     lastSeenCategory = dishItem.category;
-     const catTitle = document.createElement("div");
-     catTitle.className = "menu-category-title";
-     catTitle.innerText = lastSeenCategory.toUpperCase();
-     displayContainer.appendChild(catTitle);
-   }
-   const card = document.createElement("div");
-   card.className = "item-card";
-   card.onclick = () => addItemToOrderBasket(dishItem.id);
-   card.innerHTML = `<span style="font-size:12px; font-weight:bold; display:block; line-height:1.2;">${dishItem.name}</span>
-                     <span class="price">₱${dishItem.defaultPrice.toFixed(2)}</span>`;
-   displayContainer.appendChild(card);
+  const categories = [...new Set(systemMenuCatalog.map(item => item.category))].filter(c => c !== "Ingredients");
+  categories.forEach(categoryName => {
+   const header = document.createElement("div");
+   header.className = "menu-category-title";
+   header.innerText = categoryName;
+   displayContainer.appendChild(header);
+  
+   const itemsInCategory = systemMenuCatalog.filter(i => i.category === categoryName);
+   itemsInCategory.forEach(menuItem => {
+     const card = document.createElement("div");
+     card.className = "item-card";
+     card.onclick = () => addItemToOrderBasket(menuItem.id);
+     card.innerHTML = `<span>${menuItem.name}</span><span class="price">₱${menuItem.defaultPrice.toFixed(2)}</span>`;
+     displayContainer.appendChild(card);
+   });
  });
 }
 
 
-/* ---------- Basket Logic ---------- */
 /* ---------- Basket Logic ---------- */
 function addItemToOrderBasket(menuItemId) {
  const catalogMatch = systemMenuCatalog.find(i => i.id === menuItemId);
@@ -747,41 +739,6 @@ function addItemToOrderBasket(menuItemId) {
  saveState(); // <--- Added here to save data on every item added
 }
 
-
-function recalculateBasketTotals() {
- const basketContainer = document.getElementById("basket-entries");
- basketContainer.innerHTML = "";
- if (activeBasketArray.length === 0) {
-   basketContainer.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Order basket is completely empty.</td></tr>';
-   document.getElementById("summary-subtotal").innerText = "PHP 0.00";
-   document.getElementById("summary-discount").innerText = "PHP 0.00";
-   document.getElementById("summary-grand-total").innerText = "PHP 0.00";
-   calculateChangeReturnAmount();
-   return;
- }
- let subtotal = 0;
- let highestItemPrice = 0;
- activeBasketArray.forEach(basketRow => {
-   const totalRowPrice = basketRow.qty * basketRow.price;
-   subtotal += totalRowPrice;
-   if (basketRow.price > highestItemPrice) highestItemPrice = basketRow.price;
-   const tr = document.createElement("tr");
-   tr.innerHTML = `<td><strong>${basketRow.name}</strong></td>
-                   <td>${basketRow.qty}</td>
-                   <td>₱${totalRowPrice.toFixed(2)}</td>
-                   <td><button style="background:${getComputedStyle(document.documentElement).getPropertyValue('--red') || '#bc1c24'}; color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;" onclick="removeBasketItemUnit('${basketRow.id}')">X</button></td>`;
-   basketContainer.appendChild(tr);
- });
- const discRate = parseFloat(document.getElementById("pos-discount-select").value) || 0;
- const discVal = (discRate > 0) ? highestItemPrice * (discRate / 100) : 0;
- const grandTotal = Math.max(0, subtotal - discVal);
- document.getElementById("summary-subtotal").innerText = `PHP ${subtotal.toFixed(2)}`;
- document.getElementById("summary-discount").innerText = `PHP ${discVal.toFixed(2)}`;
- document.getElementById("summary-grand-total").innerText = `PHP ${grandTotal.toFixed(2)}`;
- calculateChangeReturnAmount();
-}
-
-
 function removeBasketItemUnit(itemId) {
   const idx = activeBasketArray.findIndex(i => i.id === itemId);
   if (idx !== -1) {
@@ -803,7 +760,41 @@ function clearActiveBasket() {
 }
 
 
-/* ---------- Payment & Checkout ---------- */
+function recalculateBasketTotals() {
+ const basketContainer = document.getElementById("basket-entries");
+ basketContainer.innerHTML = "";
+ if (activeBasketArray.length === 0) {
+   basketContainer.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Order basket is completely empty.</td></tr>';
+   document.getElementById("summary-subtotal").innerText = "PHP 0.00";
+   document.getElementById("summary-discount").innerText = "PHP 0.00";
+   document.getElementById("summary-grand-total").innerText = "PHP 0.00";
+   calculateChangeReturnAmount();
+   return;
+ }
+  let subtotal = 0;
+ let highestItemPrice = 0;
+  activeBasketArray.forEach(basketRow => {
+   const totalRowPrice = basketRow.qty * basketRow.price;
+   subtotal += totalRowPrice;
+   if (basketRow.price > highestItemPrice) highestItemPrice = basketRow.price;
+  
+   const tr = document.createElement("tr");
+   tr.innerHTML = `<td><strong>${basketRow.name}</strong></td>
+                   <td>${basketRow.qty}</td>
+                   <td>₱${totalRowPrice.toFixed(2)}</td>
+                   <td><button style="background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;" onclick="removeBasketItemUnit('${basketRow.id}')">X</button></td>`;
+   basketContainer.appendChild(tr);
+ });
+  const discRate = parseFloat(document.getElementById("pos-discount-select").value) || 0;
+ const discVal = (discRate > 0) ? highestItemPrice * (discRate / 100) : 0;
+ const grandTotal = Math.max(0, subtotal - discVal);
+  document.getElementById("summary-subtotal").innerText = `PHP ${subtotal.toFixed(2)}`;
+ document.getElementById("summary-discount").innerText = `PHP ${discVal.toFixed(2)}`;
+ document.getElementById("summary-grand-total").innerText = `PHP ${grandTotal.toFixed(2)}`;
+  calculateChangeReturnAmount();
+}
+
+
 function calculateChangeReturnAmount() {
  const amountDueText = document.getElementById("summary-grand-total").innerText.replace("PHP ", "").replace(",", "");
  const amountDue = parseFloat(amountDueText) || 0;
@@ -878,7 +869,7 @@ function executePOSCheckoutOrder() {
 }
 
 
- // Deduct from stock levels
+ // 2. LOGIC FOR INVENTORY & REPORTING
  activeBasketArray.forEach(row => {
    if (inventoryDatabaseStore[row.id]) {
      inventoryDatabaseStore[row.id].stockLevel = Math.max(0, inventoryDatabaseStore[row.id].stockLevel - row.qty);
@@ -888,62 +879,25 @@ function executePOSCheckoutOrder() {
    }
    dailyReport.itemsSold[row.name] = (dailyReport.itemsSold[row.name] || 0) + row.qty;
  });
-
-
- dailyReport.totalSales += totalPayable;
+  dailyReport.totalSales += totalPayable;
  if (payMethod === "cash") dailyReport.cashSales += totalPayable;
  else dailyReport.onlineSales += totalPayable;
  dailyReport.orderCount++;
-
-
- const ticketId = "SNJ-" + Math.floor(1000 + Math.random() * 9000);
- kitchenPendingQueue.push({
+  kitchenPendingQueue.push({
    ticketId: ticketId,
    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
    items: JSON.parse(JSON.stringify(activeBasketArray))
  });
-
-
- // Build receipt markup
- let itemsMarkup = "";
- activeBasketArray.forEach(item => {
-   itemsMarkup += `<div class="receipt-row"><span>${item.qty} x ${item.name}</span><span>₱${(item.qty * item.price).toFixed(2)}</span></div>`;
- });
-
-
- const receiptArea = document.getElementById("receipt-print-area");
- receiptArea.innerHTML = `
-   <div class="center-text" style="font-weight:bold; font-size:16px;">SILOGAN NI JOY</div>
-   <div class="center-text">POS Operational Ticket Slip</div>
-   <div class="receipt-line"></div>
-   <div class="receipt-row"><span>Date :</span><span>${new Date().toLocaleString()}</span></div>
-   ${itemsMarkup}
-   <div class="receipt-line"></div>
-   <div class="receipt-row"><span>Grand Total :</span><span style="font-weight:bold;">₱${totalPayable.toFixed(2)}</span></div>
-   <div class="receipt-row"><span>Payment Method :</span><span>${payMethod.toUpperCase()}</span></div>
-   <div class="receipt-line"></div>
-   <div class="center-text">Thank you for your purchase</div>
- `;
-
-
- // Update UI and inventory
+  // Reset UI Basket
+ activeBasketArray = [];
+ document.getElementById("pos-discount-select").value = "0";
+ document.getElementById("pos-cash-tendered").value = "";
+ recalculateBasketTotals();
+ renderKitchenQueueUI();
  refreshInventoryTableUI();
  updateFinancialUI();
- renderKitchenQueueUI();
- recalculateBasketTotals();
- clearActiveBasket();
-
-
- // Trigger print: add class, allow layout to settle, then print
- document.body.classList.add('print-mode-receipt');
- // Small delay helps Android WebView apply styles before print
- setTimeout(() => {
-   try {
-     window.print();
-   } catch (e) {
-     console.error('Print failed', e);
-   }
- }, 500);
+  // 3. SEND DIRECTLY TO RAWBT VIA APP SCHEME (No preview screen!)
+ window.location.href = "rawbt:" + encodeURIComponent(receiptText);
 }
 
 
@@ -954,15 +908,32 @@ function renderKitchenQueueUI() {
  kitchenPendingQueue.forEach(ticket => {
    const card = document.createElement("div");
    card.className = "order-card";
+  
    let itemsHtml = "";
    ticket.items.forEach(it => itemsHtml += `<div>${it.qty} x ${it.name}</div>`);
-   card.innerHTML = `<h4>Ticket ${ticket.ticketId} <small style="float:right">${ticket.timestamp}</small></h4><div>${itemsHtml}</div>`;
+  
+   card.innerHTML = `
+     <h4>Ticket ${ticket.ticketId} <small style="float:right">${ticket.timestamp}</small></h4>
+     <div>${itemsHtml}</div>
+     <button class="action-btn" style="margin-top: 15px; background: #28a745; padding: 8px;" onclick="markOrderAsServed('${ticket.ticketId}')">
+       ✓ Mark as Served
+     </button>
+   `;
+  
    container.appendChild(card);
  });
  document.getElementById("queue-count-badge").innerText = kitchenPendingQueue.length;
 }
 
 
+function markOrderAsServed(ticketId) {
+  const index = kitchenPendingQueue.findIndex(ticket => ticket.ticketId === ticketId);
+  if (index !== -1) {
+    kitchenPendingQueue.splice(index, 1);
+    renderKitchenQueueUI();
+    saveState();
+  }
+}
 /* ---------- Financials & Ledger ---------- */
 function updateFinancialUI() {
   document.getElementById("ui-total-sales").innerText = `PHP ${dailyReport.totalSales.toFixed(2)}`;
@@ -979,53 +950,54 @@ function updateFinancialUI() {
   saveState();
 }
 
-
 function applyManualFinancialAdjustment() {
  const target = document.getElementById("adj-metric-target").value;
  const val = parseFloat(document.getElementById("adj-metric-value").value) || 0;
  if (!val) return;
- switch (target) {
+  switch (target) {
    case 'totalSales_add': dailyReport.totalSales += val; break;
    case 'totalSales_sub': dailyReport.totalSales = Math.max(0, dailyReport.totalSales - val); break;
    case 'cashSales_add': dailyReport.cashSales += val; break;
    case 'cashSales_sub': dailyReport.cashSales = Math.max(0, dailyReport.cashSales - val); break;
    case 'onlineSales_add': dailyReport.onlineSales += val; break;
    case 'onlineSales_sub': dailyReport.onlineSales = Math.max(0, dailyReport.onlineSales - val); break;
-   case 'orderCount_add': dailyReport.orderCount += Math.round(val); break;
-   case 'orderCount_sub': dailyReport.orderCount = Math.max(0, dailyReport.orderCount - Math.round(val)); break;
+   case 'orderCount_add': dailyReport.orderCount += val; break;
+   case 'orderCount_sub': dailyReport.orderCount = Math.max(0, dailyReport.orderCount - val); break;
  }
+ document.getElementById("adj-metric-value").value = '';
  updateFinancialUI();
 }
 
 
 function addNewDeductionEntry() {
  const type = document.getElementById("expense-type-select").value;
- const desc = document.getElementById("expense-desc-input").value || '';
- const payee = document.getElementById("expense-payee-input").value || '';
- const amount = parseFloat(document.getElementById("expense-amount-input").value) || 0;
- if (!amount) return alert('Enter an amount');
- itemizedDeductionsLedger.push({ category: type, description: desc || payee, amount: amount });
+ const desc = document.getElementById("expense-desc-input").value || "Miscellaneous";
+ const payee = document.getElementById("expense-payee-input").value || "N/A";
+ const amt = parseFloat(document.getElementById("expense-amount-input").value) || 0;
+  if (amt <= 0) return alert('Enter valid amount');
+  itemizedDeductionsLedger.push({ category: type, description: `${desc} (${payee})`, amount: amt });
  updateFinancialUI();
- document.getElementById("expense-desc-input").value = '';
+  document.getElementById("expense-desc-input").value = '';
  document.getElementById("expense-payee-input").value = '';
  document.getElementById("expense-amount-input").value = '';
 }
 
 
 function refreshSummarizedOrdersUI() {
- const tbody = document.getElementById("summarized-orders-display-body");
- tbody.innerHTML = "";
- const items = dailyReport.itemsSold;
- const keys = Object.keys(items);
- if (keys.length === 0) {
-   tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>';
-   return;
- }
- keys.forEach(name => {
-   const tr = document.createElement("tr");
-   tr.innerHTML = `<td>${name}</td><td>${items[name]}</td><td><button onclick="void(0)">—</button></td>`;
-   tbody.appendChild(tr);
- });
+  const container = document.getElementById("ui-summarized-orders"); 
+  if (!container) return;
+  container.innerHTML = "";
+  let html = "";
+  for (const [key, value] of Object.entries(dailyReport.itemsSold)) {
+    html += `<tr>
+      <td>${key}</td>
+      <td style="text-align: right;"><strong>${value}</strong> units</td>
+    </tr>`;
+  }
+  if (html === "") {
+    html = `<tr><td colspan="2" style="text-align:center; color:#888; padding: 10px;">No sales volumes recorded yet today.</td></tr>`;
+  }
+  container.innerHTML = html;
 }
 
 
@@ -1044,6 +1016,69 @@ function refreshDeductionsUI() {
 }
 
 
+/* ---------- Report Generation ---------- */
+function triggerReportPDFGeneration() {
+ const reportArea = document.getElementById("report-print-area");
+  let itemsRows = "";
+ Object.keys(dailyReport.itemsSold).forEach(key => {
+   itemsRows += `<tr><td>${key}</td><td>${dailyReport.itemsSold[key]}</td></tr>`;
+ });
+  let deductionsRows = "";
+ itemizedDeductionsLedger.forEach(d => {
+   deductionsRows += `<tr><td>${d.category}</td><td>${d.description}</td><td>PHP ${d.amount.toFixed(2)}</td></tr>`;
+ });
+  const totalDeductions = itemizedDeductionsLedger.reduce((s, r) => s + (r.amount || 0), 0);
+ const startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
+ const netCash = startingCash + dailyReport.cashSales - totalDeductions;
+  reportArea.innerHTML = `
+   <h2>Silogan ni Joy - Daily Financial Summary</h2>
+   <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+   <h3>Financial Metrics</h3>
+   <table>
+     <tr><th>Gross Sales</th><td>PHP ${dailyReport.totalSales.toFixed(2)}</td></tr>
+     <tr><th>Cash Sales</th><td>PHP ${dailyReport.cashSales.toFixed(2)}</td></tr>
+     <tr><th>Online Sales</th><td>PHP ${dailyReport.onlineSales.toFixed(2)}</td></tr>
+     <tr><th>Total Deductions</th><td>PHP ${totalDeductions.toFixed(2)}</td></tr>
+     <tr><th>Net Cash on Hand</th><td>PHP ${netCash.toFixed(2)}</td></tr>
+     <tr><th>Transactions</th><td>${dailyReport.orderCount}</td></tr>
+   </table>
+   <h3>Items Sold</h3>
+   <table>
+     <thead><tr><th>Item</th><th>Qty</th></tr></thead>
+     <tbody>${itemsRows || '<tr><td colspan="2">No items sold</td></tr>'}</tbody>
+   </table>
+   <h3>Ledger Deductions</h3>
+   <table>
+     <thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+     <tbody>${deductionsRows || '<tr><td colspan="3">No deductions</td></tr>'}</tbody>
+   </table>
+ `;
+  // BUG FIX: Print Execution with Increased Timeouts for Tablet Render
+ document.body.classList.add('print-mode-report');
+  setTimeout(() => {
+   try { window.print(); } catch (e) { console.error('Print failed', e); }
+  
+   // Manually clean up classes 2 seconds after the prompt opens
+   setTimeout(() => {
+     document.body.classList.remove('print-mode-report');
+   }, 2000);
+  
+ }, 1500); // 1.5 second delay
+}
+
+
+function resetEntireDailyMasterReport() {
+  if (!confirm('Reset all daily financial data?')) return;
+  dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
+  itemizedDeductionsLedger = [];
+  kitchenPendingQueue = []; 
+  updateFinancialUI();
+  renderKitchenQueueUI();
+  refreshInventoryTableUI();
+  saveState();
+}
+
+
 /* ---------- Inventory ---------- */
 function refreshInventoryTableUI(filter = 'all') {
  const tbody = document.getElementById("inventory-table-body");
@@ -1053,19 +1088,18 @@ function refreshInventoryTableUI(filter = 'all') {
    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">No inventory rows.</td></tr>';
    return;
  }
- ids.forEach(id => {
+  ids.forEach(id => {
    const row = inventoryDatabaseStore[id];
    if (filter === 'low' && row.stockLevel >= 10) return;
    if (filter === 'out' && row.stockLevel > 0) return;
+  
    const status = row.stockLevel === 0 ? '<span class="badge bg-danger">OUT</span>' : (row.stockLevel < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
+  
    const tr = document.createElement("tr");
    tr.innerHTML = `<td>${id} / ${row.name}</td><td>${row.stockLevel}</td><td>${status}</td><td>${row.supplierNotes}</td>`;
    tbody.appendChild(tr);
  });
-
-
- // Update inventory dropdowns
- const invSelect = document.getElementById("inventory-target-select");
+  const invSelect = document.getElementById("inventory-target-select");
  invSelect.innerHTML = "";
  Object.keys(inventoryDatabaseStore).forEach(id => {
    invSelect.add(new Option(inventoryDatabaseStore[id].name + " (" + id + ")", id));
@@ -1119,7 +1153,7 @@ function appendCostingIngredientRow() {
 function recomputeRecipeAnalyticsGains() {
  const baseCost = recipeIngredientsMatrix.reduce((s, r) => s + (r.unitCost || 0), 0);
  document.getElementById("calc-base-cost").innerText = `PHP ${baseCost.toFixed(2)}`;
- const marginPct = parseFloat(document.getElementById("recipe-target-margin").value) || 0;
+  const marginPct = parseFloat(document.getElementById("recipe-target-margin").value) || 0;
  const suggested = baseCost / Math.max(0.01, (1 - marginPct / 100));
  document.getElementById("calc-suggested-price").innerText = `PHP ${suggested.toFixed(2)}`;
 }
@@ -1132,100 +1166,73 @@ function renderRecipeIngredientsUI() {
    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No recipe calculations saved.</td></tr>';
    return;
  }
- recipeIngredientsMatrix.forEach(r => {
+ recipeIngredientsMatrix.forEach(row => {
    const tr = document.createElement("tr");
-   tr.innerHTML = `<td>${r.dish}</td><td>${r.ingredient}</td><td>PHP ${r.unitCost.toFixed(2)}</td>`;
+   const catalogMatch = systemMenuCatalog.find(i => i.id === row.dish);
+   const dishName = catalogMatch ? catalogMatch.name : row.dish;
+   tr.innerHTML = `<td>${dishName}</td><td>${row.ingredient}</td><td>PHP ${row.unitCost.toFixed(2)}</td>`;
    tbody.appendChild(tr);
  });
 }
 
 
-/* ---------- Reports & Printing ---------- */
-function triggerReportPDFGeneration() {
- // Build a simple report HTML into report-print-area
- const reportArea = document.getElementById("report-print-area");
- const startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
+/* ---------- Direct Text Print for Financial Summary ---------- */
+function printFinancialSummaryRawBT() {
+ // 1. Calculate deductions and cash totals dynamically
  const totalDeductions = itemizedDeductionsLedger.reduce((s, r) => s + (r.amount || 0), 0);
+ const startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
  const netCash = startingCash + dailyReport.cashSales - totalDeductions;
 
 
- let itemsRows = "";
- Object.keys(dailyReport.itemsSold).forEach(name => {
-   itemsRows += `<tr><td>${name}</td><td>${dailyReport.itemsSold[name]}</td></tr>`;
- });
+ // 2. Build the Raw Text layout for RawBT
+ let summaryText = "        SILOGAN NI JOY\n";
+ summaryText += "   DAILY FINANCIAL SUMMARY\n";
+ summaryText += "================================\n";
+ summaryText += "Date: " + new Date().toLocaleDateString() + "\n";
+ summaryText += "Time: " + new Date().toLocaleTimeString() + "\n";
+ summaryText += "================================\n\n";
+  summaryText += "FINANCIAL METRICS:\n";
+ summaryText += "Gross Sales:   PHP " + dailyReport.totalSales.toFixed(2) + "\n";
+ summaryText += "Cash Sales:    PHP " + dailyReport.cashSales.toFixed(2) + "\n";
+ summaryText += "Online Sales:  PHP " + dailyReport.onlineSales.toFixed(2) + "\n";
+ summaryText += "Deductions:    PHP " + totalDeductions.toFixed(2) + "\n";
+ summaryText += "--------------------------------\n";
+ summaryText += "NET CASH ON HAND:\n";
+ summaryText += "               PHP " + netCash.toFixed(2) + "\n";
+ summaryText += "================================\n\n";
+  summaryText += "ITEMS SOLD:\n";
+ const itemsKeys = Object.keys(dailyReport.itemsSold);
+ if (itemsKeys.length === 0) {
+   summaryText += "No items sold today.\n";
+ } else {
+   itemsKeys.forEach(key => {
+     // Formats as: 5x Tapsilog
+     summaryText += `${dailyReport.itemsSold[key]}x ${key}\n`;
+   });
+ }
+ summaryText += "================================\n\n";
+  summaryText += "DEDUCTIONS LEDGER:\n";
+ if (itemizedDeductionsLedger.length === 0) {
+   summaryText += "No deductions recorded.\n";
+ } else {
+   itemizedDeductionsLedger.forEach(d => {
+     summaryText += `-[${d.category}]\n`;
+     summaryText += `  ${d.description || 'Expenses'}\n`;
+     summaryText += `               PHP ${d.amount.toFixed(2)}\n`;
+   });
+ }
+ summaryText += "================================\n";
+ summaryText += "        End of Report\n\n\n\n";
 
 
- let deductionsRows = "";
- itemizedDeductionsLedger.forEach(d => deductionsRows += `<tr><td>${d.category}</td><td>${d.description}</td><td>PHP ${d.amount.toFixed(2)}</td></tr>`);
-
-
- reportArea.innerHTML = `
-   <h2>Silogan ni Joy - Daily Financial Summary</h2>
-   <table>
-     <tr><th>Starting Cash</th><td>PHP ${startingCash.toFixed(2)}</td></tr>
-     <tr><th>Gross Sales</th><td>PHP ${dailyReport.totalSales.toFixed(2)}</td></tr>
-     <tr><th>Cash Sales</th><td>PHP ${dailyReport.cashSales.toFixed(2)}</td></tr>
-     <tr><th>Online Sales</th><td>PHP ${dailyReport.onlineSales.toFixed(2)}</td></tr>
-     <tr><th>Total Deductions</th><td>PHP ${totalDeductions.toFixed(2)}</td></tr>
-     <tr><th>Net Cash on Hand</th><td>PHP ${netCash.toFixed(2)}</td></tr>
-     <tr><th>Transactions</th><td>${dailyReport.orderCount}</td></tr>
-   </table>
-   <h3>Items Sold</h3>
-   <table><thead><tr><th>Item</th><th>Qty</th></tr></thead><tbody>${itemsRows || '<tr><td colspan="2">No items sold</td></tr>'}</tbody></table>
-   <h3>Ledger Deductions</h3>
-   <table><thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead><tbody>${deductionsRows || '<tr><td colspan="3">No deductions</td></tr>'}</tbody></table>
- `;
-
-
- document.body.classList.add('print-mode-report');
- setTimeout(() => {
-   try {
-     window.print();
-   } catch (e) {
-     console.error('Print failed', e);
-   }
- }, 500);
-}
-
-
-/* ---------- Utilities ---------- */
-function resetEntireDailyMasterReport() {
-  if (!confirm('Reset all daily financial data?')) return;
-  dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
-  itemizedDeductionsLedger = [];
-  kitchenPendingQueue = []; 
-  updateFinancialUI();
-  renderKitchenQueueUI();
-  refreshInventoryTableUI();
-  saveState();
-}
-
-
-/* ---------- Initial UI population ---------- */
-function refreshAllUI() {
- renderInteractivePOSMenuUI();
- repopulateMasterDropdownSelections();
- refreshInventoryTableUI();
- updateFinancialUI();
- renderKitchenQueueUI();
- renderRecipeIngredientsUI();
-}
-refreshAllUI();
-
- /* ---------- Kitchen Queue Logic ---------- */
-function markOrderAsServed(ticketId) {
-  const index = kitchenPendingQueue.findIndex(ticket => ticket.ticketId === ticketId);
-  if (index !== -1) {
-    kitchenPendingQueue.splice(index, 1);
-    renderKitchenQueueUI();
-    saveState(); // Keeps the kitchen queue synchronized on refresh
-  }
+ // 3. Fire it directly into RawBT background link
+ try {
+   window.location.href = "rawbt:" + encodeURIComponent(summaryText);
+ } catch (err) {
+   console.error("Direct report print failed", err);
+   alert("Could not connect directly to RawBT app.");
+ }
 }
 </script>
 </body>
 </html>
-
-
-
-
-
