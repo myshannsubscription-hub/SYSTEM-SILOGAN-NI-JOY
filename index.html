@@ -636,17 +636,16 @@ let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderC
 
 /* ---------- Initialization ---------- */
 window.onload = function() {
- populateSystemMasterCatalogArrays();
- initializeInventoryStorageToZero();
- renderInteractivePOSMenuUI();
- repopulateMasterDropdownSelections();
- refreshInventoryTableUI();
- updateFinancialUI();
-
-
- window.addEventListener('afterprint', () => {
-   document.body.classList.remove('print-mode-receipt', 'print-mode-report');
- });
+  populateSystemMasterCatalogArrays();
+  const hasSavedState = loadState(); // Attempt to load saved data
+  if (!hasSavedState) {
+    initializeInventoryStorageToZero(); // Only reset to zero if no save exists
+  }
+  refreshAllUI();
+  recalculateBasketTotals();
+  renderKitchenQueueUI();
+  if (recipeIngredientsMatrix.length > 0) renderRecipeIngredientsUI();
+  recomputeRecipeAnalyticsGains();
 };
 
 
@@ -725,26 +724,27 @@ function renderInteractivePOSMenuUI() {
 
 
 /* ---------- Basket Logic ---------- */
+/* ---------- Basket Logic ---------- */
 function addItemToOrderBasket(menuItemId) {
-  const catalogMatch = systemMenuCatalog.find(i => i.id === menuItemId);
-  const verifiedInv = inventoryDatabaseStore[menuItemId];
+ const catalogMatch = systemMenuCatalog.find(i => i.id === menuItemId);
+ const verifiedInv = inventoryDatabaseStore[menuItemId];
   if (verifiedInv && verifiedInv.stockLevel <= 0) {
-    if (!confirm(`STOCK WARNING: "${catalogMatch.name}" is at 0 units. Override and add anyway?`)) return;
-  }
+   if (!confirm(`STOCK WARNING: "${catalogMatch.name}" is at 0 units. Override and add anyway?`)) return;
+ }
   if (catalogMatch.category === "Silog Menu") {
-    const eggStock = inventoryDatabaseStore["ING_EGG"];
-    if (eggStock && eggStock.stockLevel <= 0) {
-      if (!confirm(`STOCK WARNING: Component [EGG] is at 0 units. Override and add ${catalogMatch.name} anyway?`)) return;
-    }
-  }
+   const eggStock = inventoryDatabaseStore["ING_EGG"];
+   if (eggStock && eggStock.stockLevel <= 0) {
+     if (!confirm(`STOCK WARNING: Component [EGG] is at 0 units. Override and add ${catalogMatch.name} anyway?`)) return;
+   }
+ }
   const existingMatch = activeBasketArray.find(entry => entry.id === menuItemId);
-  if (existingMatch) {
-    existingMatch.qty++;
-  } else {
-    activeBasketArray.push({ id: catalogMatch.id, name: catalogMatch.name, qty: 1, price: catalogMatch.defaultPrice, category: catalogMatch.category });
-  }
-  recalculateBasketTotals();
-  saveState();
+ if (existingMatch) {
+   existingMatch.qty++;
+ } else {
+   activeBasketArray.push({ id: catalogMatch.id, name: catalogMatch.name, qty: 1, price: catalogMatch.defaultPrice, category: catalogMatch.category });
+ }
+ recalculateBasketTotals();
+ saveState(); // <--- Added here to save data on every item added
 }
 
 
@@ -1211,6 +1211,16 @@ function refreshAllUI() {
  renderRecipeIngredientsUI();
 }
 refreshAllUI();
+
+ /* ---------- Kitchen Queue Logic ---------- */
+function markOrderAsServed(ticketId) {
+  const index = kitchenPendingQueue.findIndex(ticket => ticket.ticketId === ticketId);
+  if (index !== -1) {
+    kitchenPendingQueue.splice(index, 1);
+    renderKitchenQueueUI();
+    saveState(); // Keeps the kitchen queue synchronized on refresh
+  }
+}
 </script>
 </body>
 </html>
