@@ -7,8 +7,6 @@
 <style>
 
 
-
-
  @media print {
  * {
    color: #000000 !important;
@@ -46,8 +44,6 @@ body {
 .header-banner p { margin: 5px 0 0 0; font-size: 14px; color: var(--yellow); font-weight: bold; }
 
 
-
-
 /* Navigation Tabs Row */
 .navigation-tabs {
  display: flex;
@@ -75,8 +71,6 @@ body {
 }
 
 
-
-
 /* App Sections Dashboard Views */
 .app-section {
  display: none;
@@ -87,8 +81,6 @@ body {
  border: 1px solid #f3ebd4;
 }
 .app-section.active-section { display: block; }
-
-
 
 
 /* Layout Grids */
@@ -144,8 +136,6 @@ h3 {
 }
 
 
-
-
 /* Order Basket Table Styles */
 .order-basket {
  background: #fdfdfd;
@@ -192,8 +182,6 @@ button.secondary-btn { background: var(--dark); color: white; }
 button.secondary-btn:hover { background: #444; }
 
 
-
-
 /* Kitchen Orders Styles */
 .order-queue-grid {
  display: grid;
@@ -208,8 +196,6 @@ button.secondary-btn:hover { background: #444; }
  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .order-card h4 { margin: 0 0 10px 0; color: var(--red); border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-
-
 
 
 /* Financial Analytics UI Cards */
@@ -229,8 +215,6 @@ button.secondary-btn:hover { background: #444; }
 .financial-card.highlight { border-left-color: var(--red); background: #fff2f2; }
 .financial-card h4 { margin: 0 0 5px 0; font-size: 13px; text-transform: uppercase; color: #666; }
 .financial-card p { margin: 0; font-size: 20px; font-weight: bold; color: #222; }
-
-
 
 
 /* Standard Master Data Tables */
@@ -254,12 +238,8 @@ button.secondary-btn:hover { background: #444; }
 }
 
 
-
-
 /* Print areas hidden by default */
 #receipt-print-area, #report-print-area { display: none; }
-
-
 
 
 /* Print rules */
@@ -311,15 +291,11 @@ button.secondary-btn:hover { background: #444; }
 </head>
 
 
-
-
 <body>
 <div class="header-banner">
  <h2>Silogan ni Joy</h2>
  <p>Integrated POS Register & Inventory Control Master Matrix</p>
 </div>
-
-
 
 
 <div class="navigation-tabs">
@@ -329,8 +305,6 @@ button.secondary-btn:hover { background: #444; }
  <button class="tab-button" onclick="switchAppTab('inventory-section')">INVENTORY</button>
  <button class="tab-button" onclick="switchAppTab('recipe-section')">COSTING</button>
 </div>
-
-
 
 
 <div id="pos-section" class="app-section active-section">
@@ -382,14 +356,10 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-
-
 <div id="orders-section" class="app-section">
  <h3>Kitchen Prep Pending Order Ticket Line</h3>
  <div id="kitchen-queue-display" class="order-queue-grid"></div>
 </div>
-
-
 
 
 <div id="financials-section" class="app-section">
@@ -468,8 +438,6 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-
-
 <div id="inventory-section" class="app-section">
  <h3>Master System Stock Controller</h3>
  <div class="filter-row">
@@ -506,8 +474,6 @@ button.secondary-btn:hover { background: #444; }
    </div>
  </div>
 </div>
-
-
 
 
 <div id="recipe-section" class="app-section">
@@ -547,12 +513,8 @@ button.secondary-btn:hover { background: #444; }
 </div>
 
 
-
-
 <div id="receipt-print-area" aria-hidden="true"></div>
 <div id="report-print-area" aria-hidden="true"></div>
-
-
 
 
 <script>
@@ -571,16 +533,12 @@ const silogItems = [
 ];
 
 
-
-
 const extrasItems = [
  { name: "PLAIN RICE", price: 20 }, { name: "FRIED RICE", price: 25 },
  { name: "FRIES - BBQ", price: 50 }, { name: "FRIES - CHEESE", price: 50 },
  { name: "FRIES - SOUR CREAM", price: 50 }, { name: "TAKE-OUT (STYRO)", price: 5 },
  { name: "TAKE-OUT (BOX)", price: 10 }
 ];
-
-
 
 
 const drinksItems = [
@@ -590,17 +548,13 @@ const drinksItems = [
  { name: "SODA - WATERMELON", price: 49 }, { name: "SODA - LYCHEE", price: 49 },
  { name: "SODA - LEMON", price: 49 }, { name: "PALAMIG - GULAMAN", price: 25 },
  { name: "PALAMIG - CUCUMBER LEMONADE", price: 25 }, { name: "PALAMIG - BLUE LEMONADE", price: 25 },
- { name: "MINERAL WATER", price: 20 }
+ { name: "MINERAL WATER", price: 25 }
 ];
-
-
 
 
 let systemMenuCatalog = [];
 let itemIndexCounter = 1;
 let inventoryDatabaseStore = {};
-
-
 
 
 let activeBasketArray = [];
@@ -610,8 +564,6 @@ let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderC
 let recipeIngredientsMatrix = [];
 
 
-
-
 /* ---------- Initialization ---------- */
 window.onload = function() {
  populateSystemMasterCatalogArrays();
@@ -619,8 +571,6 @@ window.onload = function() {
  refreshAllUI();
  // BUG FIX: Removed the conflicting window.addEventListener('afterprint')
 };
-
-
 
 
 /* ---------- Catalog & Inventory Setup ---------- */
@@ -634,16 +584,12 @@ function populateSystemMasterCatalogArrays() {
 }
 
 
-
-
 function initializeInventoryStorageToZero() {
  inventoryDatabaseStore = {};
  systemMenuCatalog.forEach(item => {
    inventoryDatabaseStore[item.id] = { name: item.name, stockLevel: 0, unitCost: 0.00, supplierNotes: "Default Entry Base" };
  });
 }
-
-
 
 
 /* ---------- UI Helpers ---------- */
@@ -663,8 +609,6 @@ function switchAppTab(targetSectionId) {
 }
 
 
-
-
 function repopulateMasterDropdownSelections() {
  const inventorySelect = document.getElementById("inventory-target-select");
  const recipeSelect = document.getElementById("recipe-dish-target");
@@ -679,16 +623,12 @@ function repopulateMasterDropdownSelections() {
 }
 
 
-
-
 function refreshAllUI() {
  renderInteractivePOSMenuUI();
  repopulateMasterDropdownSelections();
  refreshInventoryTableUI();
  updateFinancialUI();
 }
-
-
 
 
 /* ---------- POS Menu Rendering ---------- */
@@ -714,8 +654,6 @@ function renderInteractivePOSMenuUI() {
 }
 
 
-
-
 /* ---------- Basket Logic ---------- */
 function addItemToOrderBasket(menuItemId) {
  const catalogMatch = systemMenuCatalog.find(i => i.id === menuItemId);
@@ -739,8 +677,6 @@ function addItemToOrderBasket(menuItemId) {
 }
 
 
-
-
 function removeBasketItemUnit(itemId) {
  const idx = activeBasketArray.findIndex(i => i.id === itemId);
  if (idx !== -1) {
@@ -751,8 +687,6 @@ function removeBasketItemUnit(itemId) {
 }
 
 
-
-
 function clearActiveBasket() {
  if (confirm("Cancel current order?")) {
    activeBasketArray = [];
@@ -761,8 +695,6 @@ function clearActiveBasket() {
    recalculateBasketTotals();
  }
 }
-
-
 
 
 function recalculateBasketTotals() {
@@ -800,16 +732,12 @@ function recalculateBasketTotals() {
 }
 
 
-
-
 function calculateChangeReturnAmount() {
  const amountDueText = document.getElementById("summary-grand-total").innerText.replace("PHP ", "").replace(",", "");
  const amountDue = parseFloat(amountDueText) || 0;
  const cashTendered = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
  document.getElementById("pos-change-due").innerText = `PHP ${Math.max(0, cashTendered - amountDue).toFixed(2)}`;
 }
-
-
 
 
 function executePOSCheckoutOrder() {
@@ -845,8 +773,6 @@ function executePOSCheckoutOrder() {
  receiptText += "  Thank you for dining with us!\n\n\n\n";
 
 
-
-
  // 2. LOGIC FOR INVENTORY & REPORTING
  activeBasketArray.forEach(row => {
    if (inventoryDatabaseStore[row.id]) {
@@ -879,8 +805,6 @@ function executePOSCheckoutOrder() {
 }
 
 
-
-
 /* ---------- Kitchen Queue UI ---------- */
 function renderKitchenQueueUI() {
  const container = document.getElementById("kitchen-queue-display");
@@ -904,8 +828,6 @@ function renderKitchenQueueUI() {
  });
  document.getElementById("queue-count-badge").innerText = kitchenPendingQueue.length;
 }
-
-
 
 
 function markOrderAsServed(ticketId) {
@@ -935,8 +857,6 @@ function updateFinancialUI() {
 }
 
 
-
-
 function applyManualFinancialAdjustment() {
  const target = document.getElementById("adj-metric-target").value;
  const val = parseFloat(document.getElementById("adj-metric-value").value) || 0;
@@ -956,8 +876,6 @@ function applyManualFinancialAdjustment() {
 }
 
 
-
-
 function addNewDeductionEntry() {
  const type = document.getElementById("expense-type-select").value;
  const desc = document.getElementById("expense-desc-input").value || "Miscellaneous";
@@ -970,8 +888,6 @@ function addNewDeductionEntry() {
  document.getElementById("expense-payee-input").value = '';
  document.getElementById("expense-amount-input").value = '';
 }
-
-
 
 
 function refreshSummarizedOrdersUI() {
@@ -991,8 +907,6 @@ function refreshSummarizedOrdersUI() {
 }
 
 
-
-
 function refreshDeductionsUI() {
  const tbody = document.getElementById("deductions-table-body");
  tbody.innerHTML = "";
@@ -1006,8 +920,6 @@ function refreshDeductionsUI() {
    tbody.appendChild(tr);
  });
 }
-
-
 
 
 /* ---------- Report Generation ---------- */
@@ -1061,8 +973,6 @@ function triggerReportPDFGeneration() {
 }
 
 
-
-
 function resetEntireDailyMasterReport() {
  if (!confirm('Reset all daily financial data?')) return;
  dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
@@ -1072,8 +982,6 @@ function resetEntireDailyMasterReport() {
  renderKitchenQueueUI();
  refreshInventoryTableUI();
 }
-
-
 
 
 /* ---------- Inventory ---------- */
@@ -1104,8 +1012,6 @@ function refreshInventoryTableUI(filter = 'all') {
 }
 
 
-
-
 function filterInventoryDisplay(mode) {
  document.querySelectorAll('.filter-row button').forEach(b => b.classList.remove('active-filter'));
  if (mode === 'all') document.getElementById('filter-btn-all').classList.add('active-filter');
@@ -1113,8 +1019,6 @@ function filterInventoryDisplay(mode) {
  if (mode === 'out') document.getElementById('filter-btn-out').classList.add('active-filter');
  refreshInventoryTableUI(mode);
 }
-
-
 
 
 function executeSmartStockControllerUpdate() {
@@ -1130,8 +1034,6 @@ function executeSmartStockControllerUpdate() {
  inventoryDatabaseStore[target].supplierNotes = notes || inventoryDatabaseStore[target].supplierNotes;
   refreshInventoryTableUI();
 }
-
-
 
 
 /* ---------- Recipes ---------- */
@@ -1151,8 +1053,6 @@ function appendCostingIngredientRow() {
 }
 
 
-
-
 function recomputeRecipeAnalyticsGains() {
  const baseCost = recipeIngredientsMatrix.reduce((s, r) => s + (r.unitCost || 0), 0);
  document.getElementById("calc-base-cost").innerText = `PHP ${baseCost.toFixed(2)}`;
@@ -1160,8 +1060,6 @@ function recomputeRecipeAnalyticsGains() {
  const suggested = baseCost / Math.max(0.01, (1 - marginPct / 100));
  document.getElementById("calc-suggested-price").innerText = `PHP ${suggested.toFixed(2)}`;
 }
-
-
 
 
 function renderRecipeIngredientsUI() {
@@ -1181,16 +1079,12 @@ function renderRecipeIngredientsUI() {
 }
 
 
-
-
 /* ---------- Direct Text Print for Financial Summary ---------- */
 function printFinancialSummaryRawBT() {
  // 1. Calculate deductions and cash totals dynamically
  const totalDeductions = itemizedDeductionsLedger.reduce((s, r) => s + (r.amount || 0), 0);
  const startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
  const netCash = startingCash + dailyReport.cashSales - totalDeductions;
-
-
 
 
  // 2. Build the Raw Text layout for RawBT
@@ -1234,8 +1128,6 @@ function printFinancialSummaryRawBT() {
  summaryText += "        End of Report\n\n\n\n";
 
 
-
-
  // 3. Fire it directly into RawBT background link
  try {
    window.location.href = "rawbt:" + encodeURIComponent(summaryText);
@@ -1247,6 +1139,3 @@ function printFinancialSummaryRawBT() {
 </script>
 </body>
 </html>
-
-
-
