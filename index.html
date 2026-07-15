@@ -548,7 +548,7 @@ const drinksItems = [
  { name: "SODA - WATERMELON", price: 49 }, { name: "SODA - LYCHEE", price: 49 },
  { name: "SODA - LEMON", price: 49 }, { name: "PALAMIG - GULAMAN", price: 25 },
  { name: "PALAMIG - CUCUMBER LEMONADE", price: 25 }, { name: "PALAMIG - BLUE LEMONADE", price: 25 },
- { name: "MINERAL WATER", price: 25 }
+ { name: "MINERAL WATER", price: 20 }
 ];
 
 
@@ -562,69 +562,55 @@ let kitchenPendingQueue = [];
 let itemizedDeductionsLedger = [];
 let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
 let recipeIngredientsMatrix = [];
-/* ---------- Local Storage Persistence (Crash-Proof) ---------- */
+/* ---------- Local Storage Persistence ---------- */
 function saveState() {
-  const state = {};
-  
-  // Only save variables if they actually exist in your code
-  if (typeof inventoryDatabaseStore !== 'undefined') state.inventoryDatabaseStore = inventoryDatabaseStore;
-  if (typeof activeBasketArray !== 'undefined') state.activeBasketArray = activeBasketArray;
-  if (typeof kitchenPendingQueue !== 'undefined') state.kitchenPendingQueue = kitchenPendingQueue;
-  if (typeof dailyReport !== 'undefined') state.dailyReport = dailyReport;
-  
-  // Only grab input values if they actually exist on your HTML screen
-  const startingCashEl = document.getElementById("starting-cash-input");
-  if (startingCashEl) state.startingCash = startingCashEl.value;
-  
-  const discountEl = document.getElementById("pos-discount-select");
-  if (discountEl) state.discountSelect = discountEl.value;
-  
-  const paymentEl = document.getElementById("pos-payment-method");
-  if (paymentEl) state.paymentMethod = paymentEl.value;
-
+  const state = {
+    inventoryDatabaseStore,
+    activeBasketArray,
+    kitchenPendingQueue,
+    itemizedDeductionsLedger,
+    dailyReport,
+    recipeIngredientsMatrix,
+    startingCash: document.getElementById("starting-cash-input")?.value || "1000",
+    discountSelect: document.getElementById("pos-discount-select")?.value || "0",
+    paymentMethod: document.getElementById("pos-payment-method")?.value || "cash",
+    targetMargin: document.getElementById("recipe-target-margin")?.value || "60"
+  };
   localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
 }
 
 function loadState() {
   const savedData = localStorage.getItem("siloganNiJoy_State");
-  if (!savedData) return false;
-  
-  try {
+  if (savedData) {
     const state = JSON.parse(savedData);
+    inventoryDatabaseStore = state.inventoryDatabaseStore || {};
+    activeBasketArray = state.activeBasketArray || [];
+    kitchenPendingQueue = state.kitchenPendingQueue || [];
+    itemizedDeductionsLedger = state.itemizedDeductionsLedger || [];
+    dailyReport = state.dailyReport || { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
+    recipeIngredientsMatrix = state.recipeIngredientsMatrix || [];
     
-    // Only load variables if they exist in your code
-    if (state.inventoryDatabaseStore !== undefined && typeof inventoryDatabaseStore !== 'undefined') {
-      inventoryDatabaseStore = state.inventoryDatabaseStore;
-    }
-    if (state.activeBasketArray !== undefined && typeof activeBasketArray !== 'undefined') {
-      activeBasketArray = state.activeBasketArray;
-    }
-    if (state.kitchenPendingQueue !== undefined && typeof kitchenPendingQueue !== 'undefined') {
-      kitchenPendingQueue = state.kitchenPendingQueue;
-    }
-    if (state.dailyReport !== undefined && typeof dailyReport !== 'undefined') {
-      dailyReport = state.dailyReport;
-    }
-    
-    // Only restore input values if they exist on your HTML screen
-    if (state.startingCash !== undefined) {
-      const el = document.getElementById("starting-cash-input");
-      if (el) el.value = state.startingCash;
-    }
-    if (state.discountSelect !== undefined) {
-      const el = document.getElementById("pos-discount-select");
-      if (el) el.value = state.discountSelect;
-    }
-    if (state.paymentMethod !== undefined) {
-      const el = document.getElementById("pos-payment-method");
-      if (el) el.value = state.paymentMethod;
-    }
+    if (state.startingCash !== undefined && document.getElementById("starting-cash-input")) document.getElementById("starting-cash-input").value = state.startingCash;
+    if (state.discountSelect !== undefined && document.getElementById("pos-discount-select")) document.getElementById("pos-discount-select").value = state.discountSelect;
+    if (state.paymentMethod !== undefined && document.getElementById("pos-payment-method")) document.getElementById("pos-payment-method").value = state.paymentMethod;
+    if (state.targetMargin !== undefined && document.getElementById("recipe-target-margin")) document.getElementById("recipe-target-margin").value = state.targetMargin;
     return true;
-  } catch (e) {
-    console.error("Error loading saved state:", e);
-    return false;
   }
+  return false;
 }
+ window.onload = function() {
+  populateSystemMasterCatalogArrays();
+  const hasSavedState = loadState(); // Attempt to load saved data
+  if (!hasSavedState) {
+    initializeInventoryStorageToZero(); // Only reset to zero if no save exists
+  }
+  refreshAllUI();
+  recalculateBasketTotals();
+  renderKitchenQueueUI();
+  if (recipeIngredientsMatrix.length > 0) renderRecipeIngredientsUI();
+  recomputeRecipeAnalyticsGains();
+};
+
 /* ---------- Initialization ---------- */
 window.onload = function() {
  populateSystemMasterCatalogArrays();
@@ -984,20 +970,19 @@ function addNewDeductionEntry() {
 
 
 function refreshSummarizedOrdersUI() {
-  const container = document.getElementById("ui-summarized-orders"); 
-  if (!container) return;
-  container.innerHTML = "";
-  let html = "";
-  for (const [key, value] of Object.entries(dailyReport.itemsSold)) {
-    html += `<tr>
-      <td>${key}</td>
-      <td style="text-align: right;"><strong>${value}</strong> units</td>
-    </tr>`;
-  }
-  if (html === "") {
-    html = `<tr><td colspan="2" style="text-align:center; color:#888; padding: 10px;">No sales volumes recorded yet today.</td></tr>`;
-  }
-  container.innerHTML = html;
+ const tbody = document.getElementById("summarized-orders-display-body");
+ tbody.innerHTML = "";
+ const items = dailyReport.itemsSold;
+ const keys = Object.keys(items);
+  if (keys.length === 0) {
+   tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>';
+   return;
+ }
+  keys.forEach(name => {
+   const tr = document.createElement("tr");
+   tr.innerHTML = `<td>${name}</td><td>${items[name]}</td><td><button onclick="void(0)">—</button></td>`;
+   tbody.appendChild(tr);
+ });
 }
 
 
