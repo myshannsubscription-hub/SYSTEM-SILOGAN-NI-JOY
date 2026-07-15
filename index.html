@@ -562,69 +562,8 @@ let kitchenPendingQueue = [];
 let itemizedDeductionsLedger = [];
 let dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
 let recipeIngredientsMatrix = [];
-/* ---------- Local Storage Persistence (Crash-Proof) ---------- */
-function saveState() {
-  const state = {};
-  
-  // Only save variables if they actually exist in your code
-  if (typeof inventoryDatabaseStore !== 'undefined') state.inventoryDatabaseStore = inventoryDatabaseStore;
-  if (typeof activeBasketArray !== 'undefined') state.activeBasketArray = activeBasketArray;
-  if (typeof kitchenPendingQueue !== 'undefined') state.kitchenPendingQueue = kitchenPendingQueue;
-  if (typeof dailyReport !== 'undefined') state.dailyReport = dailyReport;
-  
-  // Only grab input values if they actually exist on your HTML screen
-  const startingCashEl = document.getElementById("starting-cash-input");
-  if (startingCashEl) state.startingCash = startingCashEl.value;
-  
-  const discountEl = document.getElementById("pos-discount-select");
-  if (discountEl) state.discountSelect = discountEl.value;
-  
-  const paymentEl = document.getElementById("pos-payment-method");
-  if (paymentEl) state.paymentMethod = paymentEl.value;
 
-  localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
-}
 
-function loadState() {
-  const savedData = localStorage.getItem("siloganNiJoy_State");
-  if (!savedData) return false;
-  
-  try {
-    const state = JSON.parse(savedData);
-    
-    // Only load variables if they exist in your code
-    if (state.inventoryDatabaseStore !== undefined && typeof inventoryDatabaseStore !== 'undefined') {
-      inventoryDatabaseStore = state.inventoryDatabaseStore;
-    }
-    if (state.activeBasketArray !== undefined && typeof activeBasketArray !== 'undefined') {
-      activeBasketArray = state.activeBasketArray;
-    }
-    if (state.kitchenPendingQueue !== undefined && typeof kitchenPendingQueue !== 'undefined') {
-      kitchenPendingQueue = state.kitchenPendingQueue;
-    }
-    if (state.dailyReport !== undefined && typeof dailyReport !== 'undefined') {
-      dailyReport = state.dailyReport;
-    }
-    
-    // Only restore input values if they exist on your HTML screen
-    if (state.startingCash !== undefined) {
-      const el = document.getElementById("starting-cash-input");
-      if (el) el.value = state.startingCash;
-    }
-    if (state.discountSelect !== undefined) {
-      const el = document.getElementById("pos-discount-select");
-      if (el) el.value = state.discountSelect;
-    }
-    if (state.paymentMethod !== undefined) {
-      const el = document.getElementById("pos-payment-method");
-      if (el) el.value = state.paymentMethod;
-    }
-    return true;
-  } catch (e) {
-    console.error("Error loading saved state:", e);
-    return false;
-  }
-}
 /* ---------- Initialization ---------- */
 window.onload = function() {
  populateSystemMasterCatalogArrays();
@@ -717,37 +656,11 @@ function renderInteractivePOSMenuUI() {
 
 
 /* ---------- Basket Logic ---------- */
-function addItemToOrderBasket(menuItemId) {
- const catalogMatch = systemMenuCatalog.find(i => i.id === menuItemId);
- const verifiedInv = inventoryDatabaseStore[menuItemId];
-  if (verifiedInv && verifiedInv.stockLevel <= 0) {
-   if (!confirm(`STOCK WARNING: "${catalogMatch.name}" is at 0 units. Override and add anyway?`)) return;
- }
-  if (catalogMatch.category === "Silog Menu") {
-   const eggStock = inventoryDatabaseStore["ING_EGG"];
-   if (eggStock && eggStock.stockLevel <= 0) {
-     if (!confirm(`STOCK WARNING: Component [EGG] is at 0 units. Override and add ${catalogMatch.name} anyway?`)) return;
-   }
- }
-  const existingMatch = activeBasketArray.find(entry => entry.id === menuItemId);
- if (existingMatch) {
-   existingMatch.qty++;
- } else {
-   activeBasketArray.push({ id: catalogMatch.id, name: catalogMatch.name, qty: 1, price: catalogMatch.defaultPrice, category: catalogMatch.category });
- }
- recalculateBasketTotals();
- saveState(); // <--- Added here to save data on every item added
-}
+addItemToOrderBasket
 
-function removeBasketItemUnit(itemId) {
-  const idx = activeBasketArray.findIndex(i => i.id === itemId);
-  if (idx !== -1) {
-    if (activeBasketArray[idx].qty > 1) activeBasketArray[idx].qty--;
-    else activeBasketArray.splice(idx, 1);
-  }
-  recalculateBasketTotals();
-  saveState();
-}
+
+removeBasketItemUnit
+
 
 function clearActiveBasket() {
   if (confirm("Cancel current order?")) {
@@ -817,7 +730,7 @@ function executePOSCheckoutOrder() {
     return;
   }
   const ticketId = "SNJ-" + Math.floor(1000 + Math.random() * 9000);
-  // 1. BUILD PURE TEXT FOR RAWBT
+  
   let receiptText = "       SILOGAN NI JOY\n";
   receiptText += "  POS Operational Ticket\n";
   receiptText += "================================\n";
@@ -835,7 +748,6 @@ function executePOSCheckoutOrder() {
   receiptText += "================================\n";
   receiptText += "  Thank you for dining with us!\n\n\n\n";
 
-  // 2. LOGIC FOR INVENTORY & REPORTING
   activeBasketArray.forEach(row => {
     if (inventoryDatabaseStore[row.id]) {
       inventoryDatabaseStore[row.id].stockLevel = Math.max(0, inventoryDatabaseStore[row.id].stockLevel - row.qty);
@@ -854,7 +766,7 @@ function executePOSCheckoutOrder() {
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     items: JSON.parse(JSON.stringify(activeBasketArray))
   });
-  // Reset UI Basket
+
   activeBasketArray = [];
   document.getElementById("pos-discount-select").value = "0";
   document.getElementById("pos-cash-tendered").value = "";
@@ -864,11 +776,8 @@ function executePOSCheckoutOrder() {
   updateFinancialUI();
   saveState();
 
-  // 3. SEND DIRECTLY TO RAWBT VIA APP SCHEME
   window.location.href = "rawbt:" + encodeURIComponent(receiptText);
 }
-
-
  // 2. LOGIC FOR INVENTORY & REPORTING
  activeBasketArray.forEach(row => {
    if (inventoryDatabaseStore[row.id]) {
@@ -950,6 +859,7 @@ function updateFinancialUI() {
   saveState();
 }
 
+
 function applyManualFinancialAdjustment() {
  const target = document.getElementById("adj-metric-target").value;
  const val = parseFloat(document.getElementById("adj-metric-value").value) || 0;
@@ -984,20 +894,19 @@ function addNewDeductionEntry() {
 
 
 function refreshSummarizedOrdersUI() {
-  const container = document.getElementById("ui-summarized-orders"); 
-  if (!container) return;
-  container.innerHTML = "";
-  let html = "";
-  for (const [key, value] of Object.entries(dailyReport.itemsSold)) {
-    html += `<tr>
-      <td>${key}</td>
-      <td style="text-align: right;"><strong>${value}</strong> units</td>
-    </tr>`;
-  }
-  if (html === "") {
-    html = `<tr><td colspan="2" style="text-align:center; color:#888; padding: 10px;">No sales volumes recorded yet today.</td></tr>`;
-  }
-  container.innerHTML = html;
+ const tbody = document.getElementById("summarized-orders-display-body");
+ tbody.innerHTML = "";
+ const items = dailyReport.itemsSold;
+ const keys = Object.keys(items);
+  if (keys.length === 0) {
+   tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>';
+   return;
+ }
+  keys.forEach(name => {
+   const tr = document.createElement("tr");
+   tr.innerHTML = `<td>${name}</td><td>${items[name]}</td><td><button onclick="void(0)">—</button></td>`;
+   tbody.appendChild(tr);
+ });
 }
 
 
@@ -1148,7 +1057,6 @@ function appendCostingIngredientRow() {
   document.getElementById("recipe-bulk-yield").value = '';
   saveState();
 }
-
 
 function recomputeRecipeAnalyticsGains() {
  const baseCost = recipeIngredientsMatrix.reduce((s, r) => s + (r.unitCost || 0), 0);
