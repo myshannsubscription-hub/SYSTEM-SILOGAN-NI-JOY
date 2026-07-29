@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Silogan ni Joy POS</title>
+<title>Silogan ni Joy POS - Updated</title>
 <style>
 :root {
   --red: #bc1c24;
@@ -76,11 +76,13 @@ body {
   grid-template-columns: 2fr 1fr;
   gap: 20px;
 }
+
 .grid-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
 }
+
 h3 {
   margin-top: 0;
   color: var(--red);
@@ -97,6 +99,7 @@ h3 {
   margin-top: 15px;
   font-weight: bold;
 }
+
 .item-card {
   background: #fffdf6;
   border: 2px solid var(--yellow);
@@ -265,234 +268,141 @@ button.secondary-btn:hover { background: #444; }
 </style>
 </head>
 <body>
-<div class="header-banner">
-  <h2>Silogan ni Joy</h2>
-  <p>Integrated POS Register & Inventory Control Master Matrix</p>
-</div>
+  <div class="header-banner">
+    <h2>Silogan ni Joy</h2>
+    <p>Integrated POS Register & Inventory Control Master Matrix</p>
+  </div>
 
-<div class="navigation-tabs">
-  <button class="tab-button active-tab" onclick="switchAppTab('pos-section')">POS</button>
-  <button class="tab-button" onclick="switchAppTab('orders-section')">QUEUE <span id="queue-count-badge" class="badge bg-danger">0</span></button>
-  <button class="tab-button" onclick="switchAppTab('financials-section')">FINANCIAL SUMMARY</button>
-  <button class="tab-button" onclick="switchAppTab('inventory-section')">INVENTORY</button>
-  <button class="tab-button" onclick="switchAppTab('recipe-section')">COSTING</button>
-</div>
+  <div class="navigation-tabs">
+    <button class="tab-button active-tab" onclick="switchAppTab('pos-section')">POS</button>
+    <button class="tab-button" onclick="switchAppTab('orders-section')">QUEUE <span id="queue-count-badge" class="badge bg-danger">0</span></button>
+    <button class="tab-button" onclick="switchAppTab('financials-section')">FINANCIAL SUMMARY</button>
+    <button class="tab-button" onclick="switchAppTab('inventory-section')">INVENTORY</button>
+  </div>
 
-<!-- POS View -->
-<div id="pos-section" class="app-section active-section">
-  <div class="grid-2col">
-    <div>
-      <h3>Interactive Menu Layout</h3>
-      <div id="pos-menu-grid" class="grid-cards"></div>
+  <!-- POS View -->
+  <div id="pos-section" class="app-section active-section">
+    <div class="grid-2col">
+      <div>
+        <h3>Interactive Menu Layout</h3>
+        <div id="pos-menu-grid" class="grid-cards"></div>
+      </div>
+      <div class="order-basket">
+        <h3>Order Basket</h3>
+        <div style="max-height: 220px; overflow-y:auto; margin-bottom: 10px;">
+          <table class="basket-table">
+            <thead>
+              <tr><th>Item Name</th><th>Qty</th><th>Price</th><th>Action</th></tr>
+            </thead>
+            <tbody id="basket-entries">
+              <tr><td colspan="4" style="text-align:center; color: #888;">Order basket is completely empty.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="basket-summary-row"><span>Subtotal :</span><span id="summary-subtotal">PHP 0.00</span></div>
+        <div class="basket-summary-row">
+          <label for="pos-discount-select" style="font-size:13px;">Deduction Profile :</label>
+          <select id="pos-discount-select" style="width:55%;" onchange="recalculateBasketTotals()">
+            <option value="0">None (0%)</option>
+            <option value="5">Highest Item Only (5%)</option>
+          </select>
+        </div>
+        <div class="basket-summary-row"><span>Discount Value :</span><span id="summary-discount">PHP 0.00</span></div>
+        <div class="basket-summary-row grand-total"><span>Amount Due :</span><span id="summary-grand-total">PHP 0.00</span></div>
+
+        <div style="margin-top: 15px; background:#eee; padding: 10px; border-radius: 5px;">
+          <label style="font-size: 12px; font-weight:bold; display:block; margin-bottom:2px;">Payment Method:</label>
+          <select id="pos-payment-method">
+            <option value="cash">Cash</option>
+            <option value="online">Online</option>
+          </select>
+          <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:2px;">Cash Received from Customer:</label>
+          <input type="number" id="pos-cash-tendered" placeholder="0.00" oninput="calculateChangeReturnAmount()">
+          <div class="basket-summary-row" style="font-weight:bold; margin-top: 5px;">
+            <span>Change Due :</span><span id="pos-change-due">PHP 0.00</span>
+          </div>
+        </div>
+        <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip & Print</button>
+        <button class="action-btn secondary-btn" onclick="clearActiveBasket()">Cancel Order</button>
+      </div>
     </div>
-    <div class="order-basket">
-      <h3>Order Basket</h3>
-      <div style="max-height: 220px; overflow-y:auto; margin-bottom:10px;">
-        <table class="basket-table">
-          <thead>
-            <tr><th>Item Name</th><th>Qty</th><th>Price</th><th>Action</th></tr>
-          </thead>
-          <tbody id="basket-entries">
-            <tr><td colspan="4" style="text-align:center; color: #888;">Order basket is completely empty.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="basket-summary-row"><span>Subtotal:</span><span id="summary-subtotal">PHP 0.00</span></div>
-      <div class="basket-summary-row">
-        <label for="pos-discount-select" style="font-size:13px;">Deduction Profile:</label>
-        <select id="pos-discount-select" style="width:55%;" onchange="recalculateBasketTotals()">
-          <option value="0">None (0%)</option>
-          <option value="5">Highest Item Only (5%)</option>
-        </select>
-      </div>
-      <div class="basket-summary-row"><span>Discount Value:</span><span id="summary-discount">PHP 0.00</span></div>
-      <div class="basket-summary-row grand-total"><span>Amount Due:</span><span id="summary-grand-total">PHP 0.00</span></div>
-      
-      <div style="margin-top: 15px; background:#eee; padding:10px; border-radius: 5px;">
-        <label style="font-size: 12px; font-weight:bold; display:block; margin-bottom:2px;">Payment Method: </label>
-        <select id="pos-payment-method">
-          <option value="cash">Cash</option>
-          <option value="online">Online</option>
-        </select>
-        <label style="font-size:12px; font-weight:bold; display:block; margin-bottom:2px;">Cash Received from Customer: </label>
-        <input type="number" id="pos-cash-tendered" placeholder="0.00" oninput="calculateChangeReturnAmount()">
-        <div class="basket-summary-row" style="font-weight:bold; margin-top: 5px;">
-          <span>Change Due:</span><span id="pos-change-due">PHP 0.00</span>
+  </div>
+
+  <!-- Kitchen Queue View -->
+  <div id="orders-section" class="app-section">
+    <h3>Kitchen Prep Pending Order Ticket Line</h3>
+    <div id="kitchen-queue-display" class="order-queue-grid"></div>
+  </div>
+
+  <!-- Financial Summary View -->
+  <div id="financials-section" class="app-section">
+    <h3>Daily Business Metrics Summary Board</h3>
+    <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border: 1px solid #e6dfcc;">
+      <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash):</label>
+      <input type="number" id="starting-cash-input" value="1000" style="width:200px; display:inline-block; margin:0 10px;" oninput="updateFinancialUI()">
+    </div>
+
+    <div class="financial-metric-grid">
+      <div class="financial-card highlight"><h4>Gross Sales (Combined)</h4><p id="ui-total-sales">PHP 0.00</p></div>
+      <div class="financial-card"><h4>Cash Sales Revenue</h4><p id="ui-cash-sales">PHP 0.00</p></div>
+      <div class="financial-card"><h4>Online Sales Revenue</h4><p id="ui-online-sales">PHP 0.00</p></div>
+      <div class="financial-card"><h4>Total List Deductions</h4><p id="ui-total-deductions">PHP 0.00</p></div>
+      <div class="financial-card highlight"><h4>Net Cash on Hand</h4><p id="financial-net-cash">PHP 1000.00</p></div>
+      <div class="financial-card"><h4>Transactions Served</h4><p id="ui-order-count">0</p></div>
+    </div>
+
+    <div style="margin-top:30px; display: flex; gap:15px; flex-wrap: wrap;">
+      <button type="button" class="action-btn" style="background: #28a745;" onclick="printFinancialSummaryRawBT()">Print Summary</button>
+      <button type="button" class="action-btn" style="background: #17a2b8;" onclick="downloadFinancialSummaryPDF()">Download PDF File</button>
+      <button type="button" class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
+    </div>
+  </div>
+
+  <!-- Inventory View -->
+  <div id="inventory-section" class="app-section">
+    <h3>Master System Stock Controller</h3>
+    <div class="filter-row">
+      <button id="filter-btn-all" class="active-filter" onclick="filterInventoryDisplay('all')">View All Stock Rows</button>
+      <button id="filter-btn-low" onclick="filterInventoryDisplay('low')">Low Stock Alerts (&lt; 10)</button>
+      <button id="filter-btn-out" onclick="filterInventoryDisplay('out')">Out of Stock Alert (0)</button>
+    </div>
+
+    <div class="grid-2col">
+      <div>
+        <div style="max-height:500px; overflow-y:auto;">
+          <table class="master-table">
+            <thead>
+              <tr><th>Menu Item ID & Name</th><th>Beginning Qty</th><th>Changes (+/-)</th><th>Ending Qty</th><th>Unit Cost</th><th>Supplier / Notes</th></tr>
+            </thead>
+            <tbody id="inventory-table-body"></tbody>
+          </table>
         </div>
       </div>
-      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip & Print</button>
-      <button class="action-btn secondary-btn" onclick="clearActiveBasket()">Cancel Order</button>
-    </div>
-  </div>
-</div>
 
-<!-- Kitchen Queue View -->
-<div id="orders-section" class="app-section">
-  <h3>Kitchen Prep Pending Order Ticket Line</h3>
-  <div id="kitchen-queue-display" class="order-queue-grid"></div>
-</div>
-
-<!-- Financial Summary View -->
-<div id="financials-section" class="app-section">
-  <h3>Daily Business Metrics Summary Board</h3>
-  <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border:1px solid #e6dfcc;">
-    <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
-    <input type="number" id="starting-cash-input" value="1000" style="width:200px; display:inline-block; margin:0 10px;" oninput="updateFinancialUI()">
-  </div>
-  
-  <div class="financial-metric-grid">
-    <div class="financial-card highlight"><h4>Gross Sales (Combined)</h4><p id="ui-total-sales">PHP 0.00</p></div>
-    <div class="financial-card"><h4>Cash Sales Revenue</h4><p id="ui-cash-sales">PHP 0.00</p></div>
-    <div class="financial-card"><h4>Online Sales Revenue</h4><p id="ui-online-sales">PHP 0.00</p></div>
-    <div class="financial-card"><h4>Total List Deductions</h4><p id="ui-total-deductions">PHP 0.00</p></div>
-    <div class="financial-card highlight"><h4>Net Cash on Hand</h4><p id="financial-net-cash">PHP 1000.00</p></div>
-    <div class="financial-card"><h4>Transactions Served</h4><p id="ui-order-count">0</p></div>
-  </div>
-  
-  <div class="grid-2col" style="margin-top:25px;">
-    <div>
-      <div style="background:#fffbf0; border:1px dashed var(--orange); padding:15px; border-radius: 6px; margin-bottom:20px;">
-        <h4 style="margin-top:0; color:var(--orange);">Manual Summary Counters Overrides</h4>
-        <label style="font-size: 12px; font-weight:bold;">Select Counter Vector:</label>
-        <select id="adj-metric-target" style="padding:6px; margin-bottom:8px;">
-          <option value="totalSales_add">Add to Combined Gross Sales</option>
-          <option value="totalSales_sub">Subtract from Combined Gross Sales</option>
-          <option value="cashSales_add">Add to Cash Sales Revenue</option>
-          <option value="cashSales_sub">Subtract from Cash Sales Revenue</option>
-          <option value="onlineSales_add">Add to Online Sales Revenue</option>
-          <option value="onlineSales_sub">Subtract from Online Sales Revenue</option>
-          <option value="orderCount_add">Increment Total Transactions Count</option>
-          <option value="orderCount_sub">Decrement Total Transactions Count</option>
+      <div style="background:#fffdf6; padding:20px; border-radius: 6px; border:2px dashed var(--yellow);">
+        <h3>Modify Active Stock Parameters</h3>
+        <label>Select Target Inventory Row:</label>
+        <select id="inventory-target-select"></select>
+        <label>Adjustment Mode Type:</label>
+        <select id="inventory-action-type">
+          <option value="add">Append Added Stock Count (Restock)</option>
+          <option value="subtract">Manual Deduction (Discrepancy/Spoilage)</option>
+          <option value="set">Set Beginning Qty (Reset Beginning)</option>
         </select>
-        <label style="font-size:12px; font-weight:bold;">Adjustment Entry Value:</label>
-        <input type="number" id="adj-metric-value" placeholder="0.00" style="padding:6px; margin-bottom:8px;">
-        <button class="action-btn" style="background: var(--orange); padding: 8px; margin:0;" onclick="applyManualFinancialAdjustment()">Apply Override</button>
-      </div>
-      
-      <h3>Record Operating Expense / Payout</h3>
-      <label>Deduction Stream Line:</label>
-      <select id="expense-type-select">
-        <option value="Expense">Raw Supply Operational Expense</option>
-        <option value="Salary">Staff Employee Salary Outflow</option>
-      </select>
-      <label>Item Description / Memo Note:</label>
-      <input type="text" id="expense-desc-input" placeholder="e.g., Bought egg tray">
-      <label>Disbursed Payee Entity Name: </label>
-      <input type="text" id="expense-payee-input" placeholder="e.g., Public Market Vendor">
-      <label>Value Outflow Disbursed Amount (PHP):</label>
-      <input type="number" id="expense-amount-input" placeholder="0.00">
-      <button class="action-btn" onclick="addNewDeductionEntry()">Log Expense Line Item</button>
-    </div>
-    
-    <div>
-      <h3>Summarized Orders (All Sales Volumes)</h3>
-      <div style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #e0d9c6; border-radius:4px;">
-        <table class="master-table" style="margin-top:0;">
-          <thead><tr><th>Item Name</th><th>Qty Sold</th><th>Action</th></tr></thead>
-          <tbody id="summarized-orders-display-body">
-            <tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <h3>Itemized Ledger Audit Log</h3>
-      <div style="max-height:200px; overflow-y:auto;">
-        <table class="master-table">
-          <thead><tr><th>Category</th><th>Description / Payee</th><th>Amount</th></tr></thead>
-          <tbody id="deductions-table-body">
-            <tr><td colspan="3" style="text-align:center; color:#999;">No operational ledger changes recorded.</td></tr>
-          </tbody>
-        </table>
+        <label>Change Count Value Quantity (Units):</label>
+        <input type="number" id="inventory-qty-input" value="1">
+        <label>Individual Cost Per Unit (PHP):</label>
+        <input type="number" id="inventory-cost-input" value="0.00">
+        <label>Supplier Vendor Details / Notes:</label>
+        <input type="text" id="inventory-notes-input" placeholder="e.g., Local Vendor Marketplace">
+        <button class="action-btn" onclick="executeSmartStockControllerUpdate()">Process Parameter Update</button>
       </div>
     </div>
   </div>
-  
-  <div style="margin-top:30px; display: flex; gap:15px; flex-wrap: wrap;">
-    <button type="button" class="action-btn" style="background: #28a745;" onclick="printFinancialSummaryRawBT()">Print Summary</button>
-    <button type="button" class="action-btn" style="background: #17a2b8;" onclick="downloadFinancialSummaryPDF()">Download PDF File</button>
-    <button type="button" class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
-  </div>
-</div>
 
-<!-- Inventory View -->
-<div id="inventory-section" class="app-section">
-  <h3>Master System Stock Controller</h3>
-  <div class="filter-row">
-    <button id="filter-btn-all" class="active-filter" onclick="filterInventoryDisplay('all')">View All Stock Rows</button>
-    <button id="filter-btn-low" onclick="filterInventoryDisplay('low')">Low Stock Alerts (&lt; 10)</button>
-    <button id="filter-btn-out" onclick="filterInventoryDisplay('out')">Out of Stock Alert (0)</button>
-  </div>
-  
-  <div class="grid-2col">
-    <div>
-      <div style="max-height:500px; overflow-y:auto;">
-        <table class="master-table">
-          <thead><tr><th>Menu Item ID & Name</th><th>Current Units</th><th>Status Metric</th><th>Supplier / Parameter</th></tr></thead>
-          <tbody id="inventory-table-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div style="background:#fffdf6; padding:20px; border-radius: 6px; border:2px dashed var(--yellow);">
-      <h3>Modify Active Stock Parameters</h3>
-      <label>Select Target Inventory Row: </label>
-      <select id="inventory-target-select"></select>
-      <label>Adjustment Mode Type: </label>
-      <select id="inventory-action-type">
-        <option value="add">Append Added Stock Count (Restock)</option>
-        <option value="subtract">Manual Deduction (Discrepancy/Spoilage)</option>
-      </select>
-      <label>Change Count Value Quantity (Units): </label>
-      <input type="number" id="inventory-qty-input" value="1">
-      <label>Individual Cost Per Serving (PHP):</label>
-      <input type="number" id="inventory-cost-input" value="0.00">
-      <label>Supplier Vendor Details:</label>
-      <input type="text" id="inventory-notes-input" placeholder="e.g., Local Vendor Marketplace">
-      <button class="action-btn" onclick="executeSmartStockControllerUpdate()">Process Parameter Update</button>
-    </div>
-  </div>
-</div>
-
-<!-- Costing / Recipe View -->
-<div id="recipe-section" class="app-section">
-  <h3>Recipe Component Costing & Profit Margin Projection Module</h3>
-  <div class="grid-2col">
-    <div>
-      <h3>Add Recipe Component Ingredient Track Line</h3>
-      <label>Target Menu Plate Dish:</label>
-      <select id="recipe-dish-target"></select>
-      <label>Ingredient Structural Description: </label>
-      <input type="text" id="recipe-ing-name" placeholder="e.g., Sliced Frozen Beef strips">
-      <label>Wholesale Purchase Package Cost (PHP): </label>
-      <input type="number" id="recipe-bulk-cost" placeholder="0.00">
-      <label>Yield Output Portions Per Package (Servings): </label>
-      <input type="number" id="recipe-bulk-yield" placeholder="1">
-      <button class="action-btn" onclick="appendCostingIngredientRow()">Add Ingredient to Recipe Log</button>
-      
-      <div class="costing-summary-box">
-        <h4>Calculated Pricing Target Projections</h4>
-        <p>Aggregated Ingredient Base Cost: <span id="calc-base-cost" style="font-weight:bold; color:var(--red);">PHP 0.00</span></p>
-        <label style="font-size:12px;">Target Gross Margin Goal Ratio Percentage (%):</label>
-        <input type="number" id="recipe-target-margin" value="60" oninput="recomputeRecipeAnalyticsGains()">
-        <p>Proposed Suggested Retail Value Level: <span id="calc-suggested-price" style="font-weight:bold; color: #28a745;">PHP 0.00</span></p>
-      </div>
-    </div>
-    
-    <div>
-      <h3>Active Recipe Structural Line Breakdown</h3>
-      <div style="max-height:400px; overflow-y:auto;">
-        <table class="master-table">
-          <thead><tr><th>Target Menu Item</th><th>Ingredient</th><th>Serving Unit Cost</th></tr></thead>
-          <tbody id="recipe-ingredients-body">
-            <tr><td colspan="3" style="text-align:center; color:#999;">No recipe calculations saved.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="receipt-print-area" aria-hidden="true"></div>
-<div id="report-print-area" aria-hidden="true"></div>
+  <div id="receipt-print-area" aria-hidden="true"></div>
+  <div id="report-print-area" aria-hidden="true"></div>
 
 <script>
 /* ---------- Database Configuration ---------- */
@@ -545,15 +455,20 @@ var drinksItems = [
   { name: "MINERAL WATER", price: 25 }
 ];
 
+/* New BBQ items example (you can expand) */
+var bbqItems = [
+  { name: "BBQ PORK SKEWER", price: 120 },
+  { name: "BBQ CHICKEN SKEWER", price: 130 }
+];
+
 /* ---------- Local State Management ---------- */
 var systemMenuCatalog = [];
 var itemIndexCounter = 1;
-var inventoryDatabaseStore = {};
+var inventoryDatabaseStore = {}; // keyed by item.id
 var activeBasketArray = [];
 var kitchenPendingQueue = [];
 var itemizedDeductionsLedger = [];
 var dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
-var recipeIngredientsMatrix = [];
 
 /* ---------- Lifecycle Initialization ---------- */
 window.onload = function() {
@@ -567,7 +482,7 @@ window.onload = function() {
 function populateSystemMasterCatalogArrays() {
   systemMenuCatalog = [];
   itemIndexCounter = 1;
-  
+
   silogItems.forEach(function(i) {
     systemMenuCatalog.push({
       id: "SLG" + itemIndexCounter++,
@@ -576,7 +491,7 @@ function populateSystemMasterCatalogArrays() {
       defaultPrice: i.price
     });
   });
-  
+
   extrasItems.forEach(function(i) {
     systemMenuCatalog.push({
       id: "EXT" + itemIndexCounter++,
@@ -585,7 +500,7 @@ function populateSystemMasterCatalogArrays() {
       defaultPrice: i.price
     });
   });
-  
+
   drinksItems.forEach(function(i) {
     systemMenuCatalog.push({
       id: "DRKS" + itemIndexCounter++,
@@ -594,7 +509,17 @@ function populateSystemMasterCatalogArrays() {
       defaultPrice: i.price
     });
   });
-  
+
+  bbqItems.forEach(function(i) {
+    systemMenuCatalog.push({
+      id: "BBQ" + itemIndexCounter++,
+      name: i.name,
+      category: "BBQ",
+      defaultPrice: i.price
+    });
+  });
+
+  /* Add EGG as an ingredient row (tracked inventory) */
   systemMenuCatalog.push({
     id: "ING_EGG",
     name: "EGG",
@@ -607,8 +532,10 @@ function initializeInventoryStorageToZero() {
   inventoryDatabaseStore = {};
   systemMenuCatalog.forEach(function(item) {
     inventoryDatabaseStore[item.id] = {
+      id: item.id,
       name: item.name,
-      stockLevel: 0,
+      beginningQty: 0,
+      changes: 0,      // cumulative changes during the shift/day
       unitCost: 0.00,
       supplierNotes: "Default Entry Base"
     };
@@ -620,19 +547,15 @@ function saveState() {
   var startCashEl = document.getElementById("starting-cash-input");
   var discSelEl = document.getElementById("pos-discount-select");
   var payMethEl = document.getElementById("pos-payment-method");
-  var targMargEl = document.getElementById("recipe-target-margin");
-
   var state = {
     inventoryDatabaseStore: inventoryDatabaseStore,
     activeBasketArray: activeBasketArray,
     kitchenPendingQueue: kitchenPendingQueue,
     itemizedDeductionsLedger: itemizedDeductionsLedger,
     dailyReport: dailyReport,
-    recipeIngredientsMatrix: recipeIngredientsMatrix,
     startingCash: startCashEl ? startCashEl.value : "1000",
     discountSelect: discSelEl ? discSelEl.value : "0",
-    paymentMethod: payMethEl ? payMethEl.value : "cash",
-    targetMargin: targMargEl ? targMargEl.value : "60"
+    paymentMethod: payMethEl ? payMethEl.value : "cash"
   };
   try {
     localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
@@ -650,12 +573,7 @@ function loadState() {
       if (state.activeBasketArray) activeBasketArray = state.activeBasketArray;
       if (state.kitchenPendingQueue) kitchenPendingQueue = state.kitchenPendingQueue;
       if (state.itemizedDeductionsLedger) itemizedDeductionsLedger = state.itemizedDeductionsLedger;
-      if (state.dailyReport) {
-        dailyReport = state.dailyReport;
-        if (!dailyReport.itemsSold) dailyReport.itemsSold = {};
-      }
-      if (state.recipeIngredientsMatrix) recipeIngredientsMatrix = state.recipeIngredientsMatrix;
-      
+      if (state.dailyReport) dailyReport = state.dailyReport;
       if (state.startingCash && document.getElementById("starting-cash-input")) {
         document.getElementById("starting-cash-input").value = state.startingCash;
       }
@@ -664,9 +582,6 @@ function loadState() {
       }
       if (state.paymentMethod && document.getElementById("pos-payment-method")) {
         document.getElementById("pos-payment-method").value = state.paymentMethod;
-      }
-      if (state.targetMargin && document.getElementById("recipe-target-margin")) {
-        document.getElementById("recipe-target-margin").value = state.targetMargin;
       }
     }
   } catch (e) {
@@ -683,29 +598,26 @@ function switchAppTab(targetSectionId) {
     tabButton.classList.remove("active-tab");
   });
 
-  document.getElementById(targetSectionId).classList.add("active-section");
+  var target = document.getElementById(targetSectionId);
+  if (!target) return;
+  target.classList.add("active-section");
+
   var tabs = document.querySelectorAll(".navigation-tabs button");
   if (targetSectionId === "pos-section") tabs[0].classList.add("active-tab");
   if (targetSectionId === "orders-section") tabs[1].classList.add("active-tab");
-  if (targetSectionId === "financials-section") {
-    tabs[2].classList.add("active-tab");
-    updateFinancialUI();
-  }
+  if (targetSectionId === "financials-section") tabs[2].classList.add("active-tab");
   if (targetSectionId === "inventory-section") tabs[3].classList.add("active-tab");
-  if (targetSectionId === "recipe-section") tabs[4].classList.add("active-tab");
+
+  if (targetSectionId === "financials-section") updateFinancialUI();
 }
 
+/* ---------- UI Repopulation ---------- */
 function repopulateMasterDropdownSelections() {
   var inventorySelect = document.getElementById("inventory-target-select");
-  var recipeSelect = document.getElementById("recipe-dish-target");
   inventorySelect.innerHTML = "";
-  recipeSelect.innerHTML = "";
-  
   systemMenuCatalog.forEach(function(element) {
-    inventorySelect.add(new Option(element.name, element.id));
-    if (element.category !== "Ingredients") {
-      recipeSelect.add(new Option(element.name, element.id));
-    }
+    var opt = new Option(element.name + " (" + element.id + ")", element.id);
+    inventorySelect.add(opt);
   });
 }
 
@@ -715,20 +627,15 @@ function refreshAllUI() {
   refreshInventoryTableUI();
   updateFinancialUI();
   renderKitchenQueueUI();
-  renderRecipeIngredientsUI();
-  recomputeRecipeAnalyticsGains();
 }
 
 /* ---------- Interactive POS Menu ---------- */
 function renderInteractivePOSMenuUI() {
   var displayContainer = document.getElementById("pos-menu-grid");
   displayContainer.innerHTML = "";
-  
   var categories = [];
   systemMenuCatalog.forEach(function(item) {
-    if (item.category !== "Ingredients" && categories.indexOf(item.category) === -1) {
-      categories.push(item.category);
-    }
+    if (categories.indexOf(item.category) === -1) categories.push(item.category);
   });
 
   categories.forEach(function(categoryName) {
@@ -752,22 +659,21 @@ function renderInteractivePOSMenuUI() {
 }
 
 /* ---------- Basket Logic ---------- */
+/* Note: Drinks and Extras are NOT auto-deducted from inventory when added to basket.
+   Only inventory adjustments via the Inventory controller change stock. */
+
 function addItemToOrderBasket(menuItemId) {
   var catalogMatch = systemMenuCatalog.find(function(i) { return i.id === menuItemId; });
   if (!catalogMatch) return;
-  
-  var verifiedInv = inventoryDatabaseStore[menuItemId];
-  if (verifiedInv && verifiedInv.stockLevel <= 0) {
-    if (!confirm("STOCK WARNING: \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
-  }
-  
+
+  // If item is a Silog Menu item, warn if EGG ingredient is zero
   if (catalogMatch.category === "Silog Menu") {
     var eggStock = inventoryDatabaseStore["ING_EGG"];
-    if (eggStock && eggStock.stockLevel <= 0) {
+    if (eggStock && (parseFloat(eggStock.beginningQty) + parseFloat(eggStock.changes || 0)) <= 0) {
       if (!confirm("STOCK WARNING: Component [EGG] is at 0 units. Override and add " + catalogMatch.name + " anyway?")) return;
     }
   }
-  
+
   var existingMatch = activeBasketArray.find(function(entry) { return entry.id === menuItemId; });
   if (existingMatch) {
     existingMatch.qty++;
@@ -792,9 +698,9 @@ function removeBasketItemUnit(itemId) {
     } else {
       activeBasketArray.splice(idx, 1);
     }
-    recalculateBasketTotals();
-    saveState();
   }
+  recalculateBasketTotals();
+  saveState();
 }
 
 function clearActiveBasket() {
@@ -810,7 +716,6 @@ function clearActiveBasket() {
 function recalculateBasketTotals() {
   var basketContainer = document.getElementById("basket-entries");
   basketContainer.innerHTML = "";
-  
   if (activeBasketArray.length === 0) {
     basketContainer.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Order basket is completely empty.</td></tr>';
     document.getElementById("summary-subtotal").innerText = "PHP 0.00";
@@ -822,499 +727,287 @@ function recalculateBasketTotals() {
 
   var subtotal = 0;
   var highestItemPrice = 0;
-  
+
   activeBasketArray.forEach(function(basketRow) {
     var totalRowPrice = basketRow.qty * basketRow.price;
     subtotal += totalRowPrice;
-    if (basketRow.price > highestItemPrice) {
-      highestItemPrice = basketRow.price;
-    }
-    
+    if (basketRow.price > highestItemPrice) highestItemPrice = basketRow.price;
+
     var tr = document.createElement("tr");
     tr.innerHTML = "<td><strong>" + basketRow.name + "</strong></td>" +
                    "<td>" + basketRow.qty + "</td>" +
                    "<td>PHP " + totalRowPrice.toFixed(2) + "</td>" +
-                   "<td><button style='background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;' " +
-                   "onclick=\"removeBasketItemUnit('" + basketRow.id + "')\">X</button></td>";
+                   "<td><button style='background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;' onclick=\"removeBasketItemUnit('" + basketRow.id + "')\">X</button></td>";
     basketContainer.appendChild(tr);
   });
 
   var discRate = parseFloat(document.getElementById("pos-discount-select").value) || 0;
-  var discVal = (discRate > 0) ? (highestItemPrice * (discRate / 100)) : 0;
-  var grandTotal = Math.max(0, subtotal - discVal);
+  var discountValue = 0;
+  if (discRate > 0) {
+    // "Highest Item Only" discount option: apply to highest single item price
+    discountValue = highestItemPrice * (discRate / 100);
+  }
+  var grandTotal = subtotal - discountValue;
 
   document.getElementById("summary-subtotal").innerText = "PHP " + subtotal.toFixed(2);
-  document.getElementById("summary-discount").innerText = "PHP " + discVal.toFixed(2);
+  document.getElementById("summary-discount").innerText = "PHP " + discountValue.toFixed(2);
   document.getElementById("summary-grand-total").innerText = "PHP " + grandTotal.toFixed(2);
+
   calculateChangeReturnAmount();
 }
 
+/* ---------- Checkout / Financials ---------- */
 function calculateChangeReturnAmount() {
-  var amountDueText = document.getElementById("summary-grand-total").innerText.replace("PHP", "").replace(/,/g, "");
-  var amountDue = parseFloat(amountDueText) || 0;
-  var cashTendered = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
-  document.getElementById("pos-change-due").innerText = "PHP " + Math.max(0, cashTendered - amountDue).toFixed(2);
+  var tendered = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
+  var grandText = document.getElementById("summary-grand-total").innerText.replace("PHP", "").trim();
+  var grand = parseFloat(grandText) || 0;
+  var change = tendered - grand;
+  document.getElementById("pos-change-due").innerText = "PHP " + (change >= 0 ? change.toFixed(2) : "0.00");
 }
 
-/* ---------- POS Checkout ---------- */
 function executePOSCheckoutOrder() {
   if (activeBasketArray.length === 0) {
-    alert("Basket is empty.");
+    alert("No items in basket to checkout.");
     return;
   }
+  var grandText = document.getElementById("summary-grand-total").innerText.replace("PHP", "").trim();
+  var grand = parseFloat(grandText) || 0;
+  var paymentMethod = document.getElementById("pos-payment-method").value || "cash";
 
-  var totalPayableText = document.getElementById("summary-grand-total").innerText.replace("PHP", "").replace(/,/g, "");
-  var totalPayable = parseFloat(totalPayableText) || 0;
-  var payMethod = document.getElementById("pos-payment-method").value;
-  var cashAmount = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
+  // Update daily report
+  dailyReport.totalSales = (parseFloat(dailyReport.totalSales) || 0) + grand;
+  if (paymentMethod === "cash") dailyReport.cashSales = (parseFloat(dailyReport.cashSales) || 0) + grand;
+  else dailyReport.onlineSales = (parseFloat(dailyReport.onlineSales) || 0) + grand;
+  dailyReport.orderCount = (dailyReport.orderCount || 0) + 1;
 
-  if (payMethod === "cash" && cashAmount < totalPayable) {
-    alert("Insufficient cash payment amount tendered.");
-    return;
-  }
-
-  var ticketId = "SNJ-" + Math.floor(1000 + Math.random() * 9000);
-
-  // 1. Build Receipt Template for RawBT (Compatible, pure string)
-  var receiptText = "";
-  receiptText += "         SILOGAN NI JOY\n";
-  receiptText += "     POS Operational Ticket\n";
-  receiptText += "--------------------------------\n";
-  receiptText += "Ticket No: " + ticketId + "\n";
-  receiptText += "Date: " + new Date().toLocaleString() + "\n";
-  receiptText += "--------------------------------\n";
-  activeBasketArray.forEach(function(item) {
-    receiptText += item.qty + "x " + item.name + "\n";
-    receiptText += "    PHP " + (item.qty * item.price).toFixed(2) + "\n";
-  });
-  receiptText += "--------------------------------\n";
-  receiptText += "TOTAL DUE:     PHP " + totalPayable.toFixed(2) + "\n";
-  receiptText += "PAYMENT:       " + payMethod.toUpperCase() + "\n";
-  if (payMethod === "cash") {
-    receiptText += "CASH TENDERED: PHP " + cashAmount.toFixed(2) + "\n";
-    receiptText += "CHANGE:        PHP " + Math.max(0, cashAmount - totalPayable).toFixed(2) + "\n";
-  }
-  receiptText += "--------------------------------\n";
-  receiptText += "  Thank you for dining with us!\n\n\n\n";
-
-  // 2. Logic for Stock Deduction & Report
+  // Update items sold ledger (but do NOT auto-deduct inventory for Drinks/Extras)
   activeBasketArray.forEach(function(row) {
-    if (inventoryDatabaseStore[row.id]) {
-      inventoryDatabaseStore[row.id].stockLevel = Math.max(0, inventoryDatabaseStore[row.id].stockLevel - row.qty);
-    }
-    if (row.category === "Silog Menu" && inventoryDatabaseStore["ING_EGG"]) {
-      inventoryDatabaseStore["ING_EGG"].stockLevel = Math.max(0, inventoryDatabaseStore["ING_EGG"].stockLevel - row.qty);
-    }
-    dailyReport.itemsSold[row.name] = (dailyReport.itemsSold[row.name] || 0) + row.qty;
+    if (!dailyReport.itemsSold[row.id]) dailyReport.itemsSold[row.id] = { name: row.name, qty: 0 };
+    dailyReport.itemsSold[row.id].qty += row.qty;
   });
 
-  dailyReport.totalSales += totalPayable;
-  if (payMethod === "cash") {
-    dailyReport.cashSales += totalPayable;
-  } else {
-    dailyReport.onlineSales += totalPayable;
-  }
-  dailyReport.orderCount++;
+  // Add to kitchen queue (for printing/prep)
+  var orderTicket = {
+    id: "OT" + Date.now(),
+    items: JSON.parse(JSON.stringify(activeBasketArray)),
+    total: grand,
+    paymentMethod: paymentMethod,
+    timestamp: new Date().toISOString()
+  };
+  kitchenPendingQueue.push(orderTicket);
 
-  // Queue to Kitchen
-  kitchenPendingQueue.push({
-    ticketId: ticketId,
-    timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    items: JSON.parse(JSON.stringify(activeBasketArray))
-  });
-
-  // Clear POS Active UI Frame
+  // Clear basket
   activeBasketArray = [];
-  document.getElementById("pos-discount-select").value = "0";
   document.getElementById("pos-cash-tendered").value = "";
-
   recalculateBasketTotals();
-  renderKitchenQueueUI();
-  refreshInventoryTableUI();
-  updateFinancialUI();
   saveState();
-
-  // Send Direct Link trigger to RawBT Print app
-  try {
-    window.location.href = "rawbt:" + encodeURIComponent(receiptText);
-  } catch (err) {
-    console.error("Print launcher scheme missing", err);
-  }
+  refreshAllUI();
+  alert("Checkout complete. Order queued for kitchen.");
 }
 
-/* ---------- Kitchen Queue ---------- */
+/* ---------- Kitchen Queue UI ---------- */
 function renderKitchenQueueUI() {
   var container = document.getElementById("kitchen-queue-display");
   container.innerHTML = "";
-  
+  if (!kitchenPendingQueue || kitchenPendingQueue.length === 0) {
+    container.innerHTML = "<div style='color:#888;'>No pending kitchen orders.</div>";
+    document.getElementById("queue-count-badge").innerText = "0";
+    return;
+  }
   kitchenPendingQueue.forEach(function(ticket) {
     var card = document.createElement("div");
     card.className = "order-card";
-    var itemsHtml = "";
+    var html = "<h4>Ticket " + ticket.id + "</h4>";
+    html += "<div style='font-size:13px; margin-bottom:8px;'><strong>Total:</strong> PHP " + ticket.total.toFixed(2) + "</div>";
+    html += "<div>";
     ticket.items.forEach(function(it) {
-      itemsHtml += "<div>" + it.qty + " x " + it.name + "</div>";
+      html += "<div style='margin-bottom:4px;'><strong>" + it.qty + "x</strong> " + it.name + "</div>";
     });
-    card.innerHTML = "<h4>Ticket " + ticket.ticketId + " <small style='float:right'>" + ticket.timestamp + "</small></h4>" +
-                     "<div>" + itemsHtml + "</div>" +
-                     "<button class='action-btn' style='margin-top: 15px; background: #28a745; padding: 8px;' " +
-                     "onclick=\"markOrderAsServed('" + ticket.ticketId + "')\">" +
-                     "Mark as Served</button>";
+    html += "</div>";
+    html += "<div style='margin-top:8px;'><button class='action-btn' onclick=\"markOrderAsCompleted('" + ticket.id + "')\">Mark Completed</button></div>";
+    card.innerHTML = html;
     container.appendChild(card);
   });
   document.getElementById("queue-count-badge").innerText = kitchenPendingQueue.length;
 }
 
-function markOrderAsServed(ticketId) {
-  var index = kitchenPendingQueue.findIndex(function(ticket) { return ticket.ticketId === ticketId; });
-  if (index !== -1) {
-    kitchenPendingQueue.splice(index, 1);
-    renderKitchenQueueUI();
-    saveState();
-  }
-}
-
-/* ---------- Financial Analysis ---------- */
-function updateFinancialUI() {
-  document.getElementById("ui-total-sales").innerText = "PHP " + dailyReport.totalSales.toFixed(2);
-  document.getElementById("ui-cash-sales").innerText = "PHP " + dailyReport.cashSales.toFixed(2);
-  document.getElementById("ui-online-sales").innerText = "PHP " + dailyReport.onlineSales.toFixed(2);
-
-  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
-  document.getElementById("ui-total-deductions").innerText = "PHP " + totalDeductions.toFixed(2);
-
-  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
-  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-  document.getElementById("financial-net-cash").innerText = "PHP " + netCash.toFixed(2);
-
-  document.getElementById("ui-order-count").innerText = dailyReport.orderCount;
-
-  refreshSummarizedOrdersUI();
-  refreshDeductionsUI();
-  saveState();
-}
-
-function applyManualFinancialAdjustment() {
-  var target = document.getElementById("adj-metric-target").value;
-  var val = parseFloat(document.getElementById("adj-metric-value").value) || 0;
-  if (!val) return;
-
-  switch (target) {
-    case "totalSales_add": dailyReport.totalSales += val; break;
-    case "totalSales_sub": dailyReport.totalSales = Math.max(0, dailyReport.totalSales - val); break;
-    case "cashSales_add": dailyReport.cashSales += val; break;
-    case "cashSales_sub": dailyReport.cashSales = Math.max(0, dailyReport.cashSales - val); break;
-    case "onlineSales_add": dailyReport.onlineSales += val; break;
-    case "onlineSales_sub": dailyReport.onlineSales = Math.max(0, dailyReport.onlineSales - val); break;
-    case "orderCount_add": dailyReport.orderCount += val; break;
-    case "orderCount_sub": dailyReport.orderCount = Math.max(0, dailyReport.orderCount - val); break;
-  }
-  document.getElementById("adj-metric-value").value = "";
-  updateFinancialUI();
-  saveState();
-}
-
-function addNewDeductionEntry() {
-  var type = document.getElementById("expense-type-select").value;
-  var desc = document.getElementById("expense-desc-input").value || "Miscellaneous";
-  var payee = document.getElementById("expense-payee-input").value || "N/A";
-  var amt = parseFloat(document.getElementById("expense-amount-input").value) || 0;
-
-  if (amt <= 0) return alert("Enter valid amount");
-
-  itemizedDeductionsLedger.push({
-    category: type,
-    description: desc + " (" + payee + ")",
-    amount: amt
-  });
-
-  document.getElementById("expense-desc-input").value = "";
-  document.getElementById("expense-payee-input").value = "";
-  document.getElementById("expense-amount-input").value = "";
-
-  updateFinancialUI();
-  saveState();
-}
-
-function refreshSummarizedOrdersUI() {
-  var tbody = document.getElementById("summarized-orders-display-body");
-  tbody.innerHTML = "";
-  
-  var items = dailyReport.itemsSold;
-  var keys = Object.keys(items);
-  if (keys.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>';
-    return;
-  }
-  keys.forEach(function(name) {
-    var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + name + "</td><td>" + items[name] + "</td>" + 
-                   "<td><button class='action-btn' style='margin:0; padding:4px 8px; width:auto; background:var(--red);' onclick=\"removeSummarizedItemQuantity('" + name + "')\">-</button></td>";
-    tbody.appendChild(tr);
-  });
-}
-
-function removeSummarizedItemQuantity(itemName) {
-  if (dailyReport.itemsSold[itemName]) {
-    if (dailyReport.itemsSold[itemName] > 1) {
-      dailyReport.itemsSold[itemName]--;
-    } else {
-      delete dailyReport.itemsSold[itemName];
+function markOrderAsCompleted(ticketId) {
+  var idx = kitchenPendingQueue.findIndex(function(t) { return t.id === ticketId; });
+  if (idx === -1) return;
+  // When marking completed, optionally deduct ingredients: we will deduct only for Silog Menu items by reducing EGG component by 1 per Silog item
+  var ticket = kitchenPendingQueue[idx];
+  ticket.items.forEach(function(it) {
+    var catalogItem = systemMenuCatalog.find(function(s) { return s.id === it.id; });
+    if (!catalogItem) return;
+    // Deduct EGG for Silog Menu items (1 egg per plate assumed)
+    if (catalogItem.category === "Silog Menu") {
+      var eggRow = inventoryDatabaseStore["ING_EGG"];
+      if (eggRow) {
+        eggRow.changes = (parseFloat(eggRow.changes) || 0) - it.qty;
+      }
     }
-    refreshSummarizedOrdersUI();
-    saveState();
-  }
-}
-
-function refreshDeductionsUI() {
-  var tbody = document.getElementById("deductions-table-body");
-  tbody.innerHTML = "";
-  
-  if (itemizedDeductionsLedger.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No operational ledger changes recorded.</td></tr>';
-    return;
-  }
-  itemizedDeductionsLedger.forEach(function(row) {
-    var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + row.category + "</td><td>" + row.description + "</td><td>PHP " + row.amount.toFixed(2) + "</td>";
-    tbody.appendChild(tr);
+    // For other categories (Drinks, Extras, BBQ), do NOT auto-deduct here.
   });
+
+  // Remove ticket
+  kitchenPendingQueue.splice(idx, 1);
+  saveState();
+  refreshAllUI();
 }
 
-/* ---------- Master Stock Control ---------- */
+/* ---------- Inventory UI & Logic ---------- */
 function refreshInventoryTableUI(filter) {
-  if (!filter) filter = "all";
+  filter = filter || 'all';
   var tbody = document.getElementById("inventory-table-body");
   tbody.innerHTML = "";
-  
-  var ids = Object.keys(inventoryDatabaseStore);
-  if (ids.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">No inventory rows.</td></tr>';
+  var keys = Object.keys(inventoryDatabaseStore || {});
+  if (keys.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:#999;'>No inventory rows.</td></tr>";
     return;
   }
-  
-  ids.forEach(function(id) {
-    var row = inventoryDatabaseStore[id];
-    if (filter === "low" && row.stockLevel >= 10) return;
-    if (filter === "out" && row.stockLevel > 0) return;
+  keys.forEach(function(k) {
+    var row = inventoryDatabaseStore[k];
+    var beginning = parseFloat(row.beginningQty) || 0;
+    var changes = parseFloat(row.changes) || 0;
+    var ending = beginning + changes;
+    var show = true;
+    if (filter === 'low' && ending >= 10) show = false;
+    if (filter === 'out' && ending !== 0) show = false;
+    if (!show) return;
 
-    var status = row.stockLevel === 0 ? '<span class="badge bg-danger">OUT</span>' :
-                 (row.stockLevel < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
-                 
     var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + id + " / " + row.name + "</td>" +
-                   "<td>" + row.stockLevel + "</td>" +
-                   "<td>" + status + "</td>" +
-                   "<td>" + row.supplierNotes + "</td>";
+    tr.innerHTML = "<td><strong>" + row.name + " (" + row.id + ")</strong></td>" +
+                   "<td>" + beginning + "</td>" +
+                   "<td>" + (changes >= 0 ? "+" + changes : changes) + "</td>" +
+                   "<td>" + ending + "</td>" +
+                   "<td>PHP " + (parseFloat(row.unitCost) || 0).toFixed(2) + "</td>" +
+                   "<td>" + (row.supplierNotes || "") + "</td>";
     tbody.appendChild(tr);
   });
 }
 
 function filterInventoryDisplay(mode) {
-  document.querySelectorAll(".filter-row button").forEach(function(b) {
-    b.classList.remove("active-filter");
-  });
-  if (mode === "all") document.getElementById("filter-btn-all").classList.add("active-filter");
-  if (mode === "low") document.getElementById("filter-btn-low").classList.add("active-filter");
-  if (mode === "out") document.getElementById("filter-btn-out").classList.add("active-filter");
+  document.querySelectorAll('.filter-row button').forEach(function(b) { b.classList.remove('active-filter'); });
+  if (mode === 'all') document.getElementById('filter-btn-all').classList.add('active-filter');
+  if (mode === 'low') document.getElementById('filter-btn-low').classList.add('active-filter');
+  if (mode === 'out') document.getElementById('filter-btn-out').classList.add('active-filter');
   refreshInventoryTableUI(mode);
 }
 
 function executeSmartStockControllerUpdate() {
-  var target = document.getElementById("inventory-target-select").value;
+  var targetId = document.getElementById("inventory-target-select").value;
   var mode = document.getElementById("inventory-action-type").value;
-  var qty = parseInt(document.getElementById("inventory-qty-input").value) || 0;
+  var qty = parseFloat(document.getElementById("inventory-qty-input").value) || 0;
   var cost = parseFloat(document.getElementById("inventory-cost-input").value) || 0;
   var notes = document.getElementById("inventory-notes-input").value || "";
 
-  if (!target) return alert("Select inventory row");
-
-  if (mode === "add") {
-    inventoryDatabaseStore[target].stockLevel += qty;
-  } else {
-    inventoryDatabaseStore[target].stockLevel = Math.max(0, inventoryDatabaseStore[target].stockLevel - qty);
-  }
-
-  inventoryDatabaseStore[target].unitCost = cost;
-  inventoryDatabaseStore[target].supplierNotes = notes || "Default Entry Base";
-
-  refreshInventoryTableUI();
-  saveState();
-}
-
-/* ---------- Recipes Costing Matrix ---------- */
-function appendCostingIngredientRow() {
-  var dish = document.getElementById("recipe-dish-target").value;
-  var ing = document.getElementById("recipe-ing-name").value || "";
-  var bulkCost = parseFloat(document.getElementById("recipe-bulk-cost").value) || 0;
-  var yieldPortions = parseFloat(document.getElementById("recipe-bulk-yield").value) || 1;
-
-  if (!dish || !ing || bulkCost <= 0 || yieldPortions <= 0) {
-    return alert("Complete ingredient info");
-  }
-
-  var unitCost = bulkCost / yieldPortions;
-  recipeIngredientsMatrix.push({
-    dish: dish,
-    ingredient: ing,
-    unitCost: unitCost
-  });
-
-  document.getElementById("recipe-ing-name").value = "";
-  document.getElementById("recipe-bulk-cost").value = "";
-  document.getElementById("recipe-bulk-yield").value = "";
-
-  recomputeRecipeAnalyticsGains();
-  renderRecipeIngredientsUI();
-  saveState();
-}
-
-function recomputeRecipeAnalyticsGains() {
-  var baseCost = recipeIngredientsMatrix.reduce(function(s, r) { return s + (r.unitCost || 0); }, 0);
-  document.getElementById("calc-base-cost").innerText = "PHP " + baseCost.toFixed(2);
-
-  var marginPct = parseFloat(document.getElementById("recipe-target-margin").value) || 0;
-  var suggested = baseCost / Math.max(0.01, (1 - marginPct / 100));
-  document.getElementById("calc-suggested-price").innerText = "PHP " + suggested.toFixed(2);
-}
-
-function renderRecipeIngredientsUI() {
-  var tbody = document.getElementById("recipe-ingredients-body");
-  tbody.innerHTML = "";
-  
-  if (recipeIngredientsMatrix.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No recipe calculations saved.</td></tr>';
+  if (!targetId || !inventoryDatabaseStore[targetId]) {
+    alert("Please select a valid inventory row.");
     return;
   }
-  recipeIngredientsMatrix.forEach(function(row) {
+  var row = inventoryDatabaseStore[targetId];
+
+  if (mode === 'add') {
+    row.changes = (parseFloat(row.changes) || 0) + qty;
+  } else if (mode === 'subtract') {
+    row.changes = (parseFloat(row.changes) || 0) - qty;
+  } else if (mode === 'set') {
+    // Set beginning qty to provided qty (resets changes to 0)
+    row.beginningQty = qty;
+    row.changes = 0;
+  }
+
+  row.unitCost = cost;
+  row.supplierNotes = notes;
+  saveState();
+  refreshAllUI();
+  alert("Inventory updated.");
+}
+
+/* ---------- Financial UI ---------- */
+function updateFinancialUI() {
+  document.getElementById("ui-total-sales").innerText = "PHP " + (parseFloat(dailyReport.totalSales) || 0).toFixed(2);
+  document.getElementById("ui-cash-sales").innerText = "PHP " + (parseFloat(dailyReport.cashSales) || 0).toFixed(2);
+  document.getElementById("ui-online-sales").innerText = "PHP " + (parseFloat(dailyReport.onlineSales) || 0).toFixed(2);
+  document.getElementById("ui-total-deductions").innerText = "PHP " + (parseFloat(itemizedDeductionsLedger.reduce(function(s,a){return s + (parseFloat(a.amount)||0);},0)) || 0).toFixed(2);
+  var starting = parseFloat(document.getElementById("starting-cash-input").value) || 0;
+  var netCash = starting + (parseFloat(dailyReport.cashSales) || 0) - (parseFloat(itemizedDeductionsLedger.reduce(function(s,a){return s + (parseFloat(a.amount)||0);},0)) || 0);
+  document.getElementById("financial-net-cash").innerText = "PHP " + netCash.toFixed(2);
+  document.getElementById("ui-order-count").innerText = (dailyReport.orderCount || 0);
+}
+
+/* ---------- Ledger / Deductions ---------- */
+function addNewDeductionEntry() {
+  var type = document.getElementById("expense-type-select") ? document.getElementById("expense-type-select").value : "Expense";
+  var desc = document.getElementById("expense-desc-input") ? document.getElementById("expense-desc-input").value : "";
+  var payee = document.getElementById("expense-payee-input") ? document.getElementById("expense-payee-input").value : "";
+  var amount = parseFloat(document.getElementById("expense-amount-input") ? document.getElementById("expense-amount-input").value : 0) || 0;
+  if (!desc || amount <= 0) { alert("Please provide a description and a positive amount."); return; }
+  itemizedDeductionsLedger.push({ category: type, description: desc, payee: payee, amount: amount, timestamp: new Date().toISOString() });
+  saveState();
+  updateFinancialUI();
+  refreshDeductionsUI();
+  alert("Expense logged.");
+}
+
+function refreshDeductionsUI() {
+  var tbody = document.getElementById("deductions-table-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!itemizedDeductionsLedger || itemizedDeductionsLedger.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:#999;'>No operational ledger changes recorded.</td></tr>";
+    return;
+  }
+  itemizedDeductionsLedger.forEach(function(d) {
     var tr = document.createElement("tr");
-    var catalogMatch = systemMenuCatalog.find(function(i) { return i.id === row.dish; });
-    var dishName = catalogMatch ? catalogMatch.name : row.dish;
-    tr.innerHTML = "<td>" + dishName + "</td><td>" + row.ingredient + "</td><td>PHP " + row.unitCost.toFixed(2) + "</td>";
+    tr.innerHTML = "<td>" + d.category + "</td><td>" + d.description + (d.payee ? " / " + d.payee : "") + "</td><td>PHP " + parseFloat(d.amount).toFixed(2) + "</td>";
     tbody.appendChild(tr);
   });
 }
 
-/* ---------- RawBT & PDF Reports ---------- */
+/* ---------- Summarized Orders UI ---------- */
+function refreshSummarizedOrdersUI() {
+  var tbody = document.getElementById("summarized-orders-display-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  var keys = Object.keys(dailyReport.itemsSold || {});
+  if (keys.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:#999;'>No items sold yet.</td></tr>";
+    return;
+  }
+  keys.forEach(function(k) {
+    var it = dailyReport.itemsSold[k];
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>" + it.name + "</td><td>" + it.qty + "</td><td><button onclick=\"\">Action</button></td>";
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------- Utility / Reset ---------- */
 function printFinancialSummaryRawBT() {
-  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
-  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
-  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-
-  var summaryText = "";
-  summaryText += "         SILOGAN NI JOY\n";
-  summaryText += "     DAILY FINANCIAL SUMMARY\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "Date: " + new Date().toLocaleDateString() + "\n";
-  summaryText += "Time: " + new Date().toLocaleTimeString() + "\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "FINANCIAL METRICS:\n";
-  summaryText += "Gross Sales:    PHP " + dailyReport.totalSales.toFixed(2) + "\n";
-  summaryText += "Cash Sales:     PHP " + dailyReport.cashSales.toFixed(2) + "\n";
-  summaryText += "Online Sales:   PHP " + dailyReport.onlineSales.toFixed(2) + "\n";
-  summaryText += "Deductions:     PHP " + totalDeductions.toFixed(2) + "\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "NET CASH ON HAND:\n";
-  summaryText += "                PHP " + netCash.toFixed(2) + "\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "ITEMS SOLD:\n";
-
-  var itemsKeys = Object.keys(dailyReport.itemsSold);
-  if (itemsKeys.length === 0) {
-    summaryText += "No items sold today.\n";
-  } else {
-    itemsKeys.forEach(function(key) {
-      summaryText += dailyReport.itemsSold[key] + "x " + key + "\n";
-    });
-  }
-  
-  summaryText += "--------------------------------\n";
-  summaryText += "DEDUCTIONS LEDGER:\n";
-  if (itemizedDeductionsLedger.length === 0) {
-    summaryText += "No deductions recorded.\n";
-  } else {
-    itemizedDeductionsLedger.forEach(function(d) {
-      summaryText += "[" + d.category + "]\n";
-      summaryText += (d.description || "Expenses") + "\n";
-      summaryText += "  PHP " + d.amount.toFixed(2) + "\n";
-    });
-  }
-  summaryText += "--------------------------------\n";
-  summaryText += "          End of Report\n\n\n\n";
-
-  try {
-    window.location.href = "rawbt:" + encodeURIComponent(summaryText);
-  } catch (err) {
-    console.error("Direct report print failed", err);
-    alert("Could not connect directly to RawBT app.");
-  }
+  alert("Print function placeholder.");
 }
-
 function downloadFinancialSummaryPDF() {
-  triggerReportPDFGeneration();
+  alert("Download PDF placeholder.");
 }
-
-function triggerReportPDFGeneration() {
-  var reportArea = document.getElementById("report-print-area");
-  var itemsRows = "";
-  Object.keys(dailyReport.itemsSold).forEach(function(key) {
-    itemsRows += "<tr><td>" + key + "</td><td>" + dailyReport.itemsSold[key] + "</td></tr>";
-  });
-
-  var deductionsRows = "";
-  itemizedDeductionsLedger.forEach(function(d) {
-    deductionsRows += "<tr><td>" + d.category + "</td><td>" + d.description + "</td><td>PHP " + d.amount.toFixed(2) + "</td></tr>";
-  });
-
-  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
-  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
-  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-
-  reportArea.innerHTML =
-    "<h2>Silogan ni Joy Daily Financial Summary</h2>" +
-    "<p><strong>Date:</strong> " + new Date().toLocaleDateString() + "</p>" +
-    "<h3>Financial Metrics</h3>" +
-    "<table>" +
-    "<tr><th>Gross Sales</th><td>PHP " + dailyReport.totalSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Cash Sales</th><td>PHP " + dailyReport.cashSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Online Sales</th><td>PHP " + dailyReport.onlineSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Total Deductions</th><td>PHP " + totalDeductions.toFixed(2) + "</td></tr>" +
-    "<tr><th>Net Cash on Hand</th><td>PHP " + netCash.toFixed(2) + "</td></tr>" +
-    "<tr><th>Transactions</th><td>" + dailyReport.orderCount + "</td></tr>" +
-    "</table>" +
-    "<h3>Items Sold</h3>" +
-    "<table>" +
-    "<thead><tr><th>Item</th><th>Qty</th></tr></thead>" +
-    "<tbody>" + (itemsRows || "<tr><td colspan='2'>No items sold</td></tr>") + "</tbody>" +
-    "</table>" +
-    "<h3>Ledger Deductions</h3>" +
-    "<table>" +
-    "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
-    "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
-    "</table>";
-
-  document.body.classList.add("print-mode-report");
-  setTimeout(function() {
-    try {
-      window.print();
-    } catch (e) {
-      console.error("Print failed", e);
-    }
-    setTimeout(function() {
-      document.body.classList.remove("print-mode-report");
-    }, 2000);
-  }, 1500);
-}
-
 function resetEntireDailyMasterReport() {
-  if (!confirm("Reset all daily financial data?")) return;
+  if (!confirm("Reset financial summary data and counters? This cannot be undone.")) return;
   dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
   itemizedDeductionsLedger = [];
-  kitchenPendingQueue = [];
-  updateFinancialUI();
-  renderKitchenQueueUI();
-  refreshInventoryTableUI();
   saveState();
+  refreshAllUI();
+  refreshDeductionsUI();
+  refreshSummarizedOrdersUI();
+  alert("Daily master report reset.");
 }
+
+/* ---------- Initial UI refresh calls ---------- */
+function refreshDeductionsUIOnLoad() {
+  refreshDeductionsUI();
+  refreshSummarizedOrdersUI();
+}
+refreshDeductionsUIOnLoad();
+
 </script>
 </body>
 </html>
