@@ -212,14 +212,35 @@ button.secondary-btn:hover { background: #444; }
 .badge.bg-danger { background-color: var(--red); }
 .badge.bg-warning { background-color: var(--orange); color: var(--dark); }
 .badge.bg-success { background-color: #28a745; }
-.filter-row { display: flex; gap: 10px; margin-bottom: 15px; }
-.filter-row button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; }
+.filter-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+.filter-row button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; flex: 1; }
 .filter-row button.active-filter { background: var(--orange); color: white; border-color: var(--orange); }
+
+/* Sub Navigation for Inventory */
+.inventory-sub-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+.inventory-sub-nav button {
+  width: auto;
+  padding: 8px 16px;
+  margin: 0;
+  background: #e0e0e0;
+  color: #333;
+  border-radius: 4px 4px 0 0;
+}
+.inventory-sub-nav button.active-sub-tab {
+  background: var(--red);
+  color: white;
+}
 
 /* Print areas hidden by default */
 #receipt-print-area, #report-print-area { display: none; }
 
-/* Print rules - FIXED to hide everything else properly without breaking the DOM */
+/* Print rules */
 @media print {
   body * { visibility: hidden; }
   
@@ -273,6 +294,7 @@ button.secondary-btn:hover { background: #444; }
 
 <!-- POS View -->
 <div id="pos-section" class="app-section active-section">
+  <!-- (Same as previous POS view) -->
   <div class="grid-2col">
     <div>
       <h3>Interactive Menu Layout</h3>
@@ -329,6 +351,7 @@ button.secondary-btn:hover { background: #444; }
 
 <!-- Financial Summary View -->
 <div id="financials-section" class="app-section">
+  <!-- (Same as previous Financial Summary View) -->
   <h3>Daily Business Metrics Summary Board</h3>
   <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border: 1px solid #e6dfcc;">
     <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
@@ -415,16 +438,24 @@ button.secondary-btn:hover { background: #444; }
 <!-- Inventory View -->
 <div id="inventory-section" class="app-section">
   <h3>Master System Stock Controller</h3>
+  
+  <!-- Sub Navigation for Silogs vs Ingredients -->
+  <div class="inventory-sub-nav">
+    <button id="sub-tab-menu" class="action-btn active-sub-tab" onclick="switchInventorySubTab('menu')">Silogs & Menu Items</button>
+    <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">Raw Ingredients & Supplies</button>
+  </div>
+
   <div class="filter-row">
     <button id="filter-btn-all" class="active-filter" onclick="filterInventoryDisplay('all')">View All Stock Rows</button>
     <button id="filter-btn-low" onclick="filterInventoryDisplay('low')">Low Stock Alerts (&lt; 10)</button>
     <button id="filter-btn-out" onclick="filterInventoryDisplay('out')">Out of Stock Alert (0)</button>
   </div>
+  
   <div class="grid-2col">
     <div>
       <div style="max-height:500px; overflow-y:auto;">
         <table class="master-table">
-          <thead><tr><th>Menu Item ID & Name</th><th>Beginning Qty</th><th>Changes (+/-)</th><th>Ending Inventory</th><th>Status Metric</th></tr></thead>
+          <thead><tr><th><span id="inv-col-header">Menu Item ID</span> & Name</th><th>Beginning Qty</th><th>Changes (+/-)</th><th>Ending Inventory</th><th>Status Metric</th></tr></thead>
           <tbody id="inventory-table-body"></tbody>
         </table>
       </div>
@@ -437,7 +468,7 @@ button.secondary-btn:hover { background: #444; }
       <select id="inventory-action-type">
         <option value="beginning">Set Beginning Quantity</option>
         <option value="add">Append Added Stock Count (Restock)</option>
-        <option value="subtract">Manual Deduction (Discrepancy/Spoilage)</option>
+        <option value="subtract">Manual Deduction (Discrepancy/Used)</option>
       </select>
       <label>Quantity (Units): </label>
       <input type="number" id="inventory-qty-input" value="1">
@@ -507,10 +538,87 @@ var drinksItems = [
   { name: "MINERAL WATER", price: 25 }
 ];
 
+/* Raw Ingredients Database (Sourced from SILOGAN DAILY INVENTORY LOG) */
+var rawIngredientsList = [
+  // MAIN INGREDIENTS
+  { name: "Rice (kg)", category: "Main Ingredients" },
+  { name: "Eggs (pcs)", category: "Main Ingredients" },
+  { name: "Ham (packs)", category: "Main Ingredients" },
+  { name: "Hotdog (packs)", category: "Main Ingredients" },
+  { name: "Skinless (packs)", category: "Main Ingredients" },
+  { name: "Hungarian (packs)", category: "Main Ingredients" },
+  { name: "Spam (cans)", category: "Main Ingredients" },
+  { name: "Longganisa (packs)", category: "Main Ingredients" },
+  { name: "Beef Tapa (packs)", category: "Main Ingredients" },
+  { name: "Tocino (packs)", category: "Main Ingredients" },
+  { name: "Bangus (packs)", category: "Main Ingredients" },
+  { name: "Bangus Tocino (packs)", category: "Main Ingredients" },
+  { name: "Bangus Tapa (packs)", category: "Main Ingredients" },
+  { name: "Corned Beef (cans)", category: "Main Ingredients" },
+  { name: "Burger Steak Patty (packs)", category: "Main Ingredients" },
+  { name: "Sisig (packs)", category: "Main Ingredients" },
+  { name: "Dinakdakan (packs)", category: "Main Ingredients" },
+  { name: "Liempo (packs)", category: "Main Ingredients" },
+  { name: "Bagnet (packs)", category: "Main Ingredients" },
+  { name: "Chicken Pastil (packs)", category: "Main Ingredients" },
+  { name: "Adobo (packs)", category: "Main Ingredients" },
+  { name: "Nuggets (packs)", category: "Main Ingredients" },
+  // VEGETABLES & SEASONINGS
+  { name: "Tomatoes (pcs)", category: "Veg & Seasonings" },
+  { name: "Cucumber (pcs)", category: "Veg & Seasonings" },
+  { name: "Onions (pcs)", category: "Veg & Seasonings" },
+  { name: "Garlic (pcs)", category: "Veg & Seasonings" },
+  { name: "Calamansi (kg)", category: "Veg & Seasonings" },
+  { name: "Red Chili (kg)", category: "Veg & Seasonings" },
+  { name: "Green Chili (kg)", category: "Veg & Seasonings" },
+  { name: "Cooking Oil (L)", category: "Veg & Seasonings" },
+  { name: "Soy Sauce (bottles)", category: "Veg & Seasonings" },
+  { name: "Vinegar (bottles)", category: "Veg & Seasonings" },
+  { name: "Ketchup (bottles)", category: "Veg & Seasonings" },
+  { name: "Mayonnaise (bottles)", category: "Veg & Seasonings" },
+  { name: "Burger Steak Gravy (packs)", category: "Veg & Seasonings" },
+  // FRIES & SNACKS
+  { name: "Fries (packs)", category: "Fries & Snacks" },
+  { name: "Cheese Powder", category: "Fries & Snacks" },
+  { name: "BBQ Powder", category: "Fries & Snacks" },
+  { name: "Sour Cream Powder", category: "Fries & Snacks" },
+  // DRINKS
+  { name: "Coke", category: "Drinks Ingredients" },
+  { name: "Mountain Dew", category: "Drinks Ingredients" },
+  { name: "Mineral Water", category: "Drinks Ingredients" },
+  { name: "Green Apple Syrup", category: "Drinks Ingredients" },
+  { name: "Blueberry Syrup", category: "Drinks Ingredients" },
+  { name: "Mango Syrup", category: "Drinks Ingredients" },
+  { name: "Strawberry Syrup", category: "Drinks Ingredients" },
+  { name: "Watermelon Syrup", category: "Drinks Ingredients" },
+  { name: "Lychee Syrup", category: "Drinks Ingredients" },
+  { name: "Lemon Syrup", category: "Drinks Ingredients" },
+  { name: "Gulaman", category: "Drinks Ingredients" },
+  { name: "Blue Lemonade", category: "Drinks Ingredients" },
+  { name: "Cucumber Lemonade", category: "Drinks Ingredients" },
+  { name: "Ice (bags)", category: "Drinks Ingredients" },
+  // PACKAGING
+  { name: "Styro Box", category: "Packaging" },
+  { name: "Craft Box", category: "Packaging" },
+  { name: "16 oz Cups", category: "Packaging" },
+  { name: "Cup Lids", category: "Packaging" },
+  { name: "Straws", category: "Packaging" },
+  { name: "Plastic Bags", category: "Packaging" },
+  { name: "Spoons & Forks", category: "Packaging" },
+  { name: "Napkins", category: "Packaging" }
+];
+
 /* Local State Management */
 var systemMenuCatalog = [];
+var systemIngredientsCatalog = [];
 var itemIndexCounter = 1;
-var inventoryDatabaseStore = {};
+var ingredientIndexCounter = 1;
+
+var inventoryDatabaseStore = {}; // For Menu Silogs
+var ingredientsDatabaseStore = {}; // For Raw Ingredients
+var activeInventoryTab = 'menu'; // Tracks which sub-tab is open ('menu' or 'ingredients')
+var currentInvFilter = 'all';
+
 var activeBasketArray = [];
 var kitchenPendingQueue = [];
 var itemizedDeductionsLedger = [];
@@ -529,29 +637,27 @@ function populateSystemMasterCatalogArrays() {
   systemMenuCatalog = [];
   itemIndexCounter = 1;
   
-  silogItems.forEach(function(i) {
-    systemMenuCatalog.push({ id: "SLG" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price });
-  });
-  bbqItems.forEach(function(i) {
-    systemMenuCatalog.push({ id: "BBQ" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price });
-  });
-  extrasItems.forEach(function(i) {
-    systemMenuCatalog.push({ id: "EXT" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price });
-  });
-  drinksItems.forEach(function(i) {
-    systemMenuCatalog.push({ id: "DRKS" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price });
+  silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "SLG" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
+  bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "BBQ" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
+  extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "EXT" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
+  drinksItems.forEach(function(i) { systemMenuCatalog.push({ id: "DRKS" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price }); });
+
+  systemIngredientsCatalog = [];
+  ingredientIndexCounter = 1;
+  rawIngredientsList.forEach(function(i) {
+    systemIngredientsCatalog.push({ id: "ING" + ingredientIndexCounter++, name: i.name, category: i.category });
   });
 }
 
 function initializeInventoryStorageToZero() {
   inventoryDatabaseStore = {};
   systemMenuCatalog.forEach(function(item) {
-    inventoryDatabaseStore[item.id] = {
-      name: item.name,
-      beginningQty: 0,
-      changesQty: 0,
-      endingQty: 0
-    };
+    inventoryDatabaseStore[item.id] = { name: item.name, beginningQty: 0, changesQty: 0, endingQty: 0 };
+  });
+
+  ingredientsDatabaseStore = {};
+  systemIngredientsCatalog.forEach(function(item) {
+    ingredientsDatabaseStore[item.id] = { name: item.name, category: item.category, beginningQty: 0, changesQty: 0, endingQty: 0 };
   });
 }
 
@@ -563,6 +669,7 @@ function saveState() {
   
   var state = {
     inventoryDatabaseStore: inventoryDatabaseStore,
+    ingredientsDatabaseStore: ingredientsDatabaseStore,
     activeBasketArray: activeBasketArray,
     kitchenPendingQueue: kitchenPendingQueue,
     itemizedDeductionsLedger: itemizedDeductionsLedger,
@@ -572,7 +679,7 @@ function saveState() {
     paymentMethod: payMethEl ? payMethEl.value : "cash"
   };
   try {
-    localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
+    localStorage.setItem("siloganNiJoy_State_v2", JSON.stringify(state));
   } catch (e) {
     console.error("Local Storage write blocked", e);
   }
@@ -580,20 +687,19 @@ function saveState() {
 
 function loadState() {
   try {
-    var saved = localStorage.getItem("siloganNiJoy_State");
+    var saved = localStorage.getItem("siloganNiJoy_State_v2");
     if (saved) {
       var state = JSON.parse(saved);
       if (state.inventoryDatabaseStore) {
-        Object.keys(state.inventoryDatabaseStore).forEach(function(key) {
-           var item = state.inventoryDatabaseStore[key];
-           if (item.stockLevel !== undefined) {
-               item.endingQty = item.stockLevel;
-               item.beginningQty = 0;
-               item.changesQty = 0;
-               delete item.stockLevel;
-           }
-        });
         inventoryDatabaseStore = state.inventoryDatabaseStore;
+      }
+      if (state.ingredientsDatabaseStore) {
+        // Merge with defaults in case of new items
+        Object.keys(state.ingredientsDatabaseStore).forEach(function(k) {
+          if (ingredientsDatabaseStore[k]) {
+            ingredientsDatabaseStore[k] = state.ingredientsDatabaseStore[k];
+          }
+        });
       }
       if (state.activeBasketArray) activeBasketArray = state.activeBasketArray;
       if (state.kitchenPendingQueue) kitchenPendingQueue = state.kitchenPendingQueue;
@@ -634,21 +740,38 @@ function switchAppTab(targetSectionId) {
     tabs[2].classList.add("active-tab");
     updateFinancialUI();
   }
-  if (targetSectionId === "inventory-section") tabs[3].classList.add("active-tab");
+  if (targetSectionId === "inventory-section") {
+    tabs[3].classList.add("active-tab");
+    refreshInventoryTableUI(currentInvFilter);
+  }
 }
 
 function repopulateMasterDropdownSelections() {
   var inventorySelect = document.getElementById("inventory-target-select");
   inventorySelect.innerHTML = "";
-  systemMenuCatalog.forEach(function(element) {
-    inventorySelect.add(new Option(element.name, element.id));
-  });
+  
+  if (activeInventoryTab === 'menu') {
+    systemMenuCatalog.forEach(function(element) {
+      inventorySelect.add(new Option(element.name, element.id));
+    });
+  } else {
+    // Group ingredients by category in the dropdown for better readability
+    var categories = {};
+    systemIngredientsCatalog.forEach(function(item) {
+      if (!categories[item.category]) {
+        categories[item.category] = document.createElement("optgroup");
+        categories[item.category].label = item.category.toUpperCase();
+        inventorySelect.appendChild(categories[item.category]);
+      }
+      categories[item.category].appendChild(new Option(item.name, item.id));
+    });
+  }
 }
 
 function refreshAllUI() {
   renderInteractivePOSMenuUI();
   repopulateMasterDropdownSelections();
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   updateFinancialUI();
   renderKitchenQueueUI();
 }
@@ -855,11 +978,10 @@ function executePOSCheckoutOrder() {
   recalculateBasketTotals();
   
   renderKitchenQueueUI();
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   updateFinancialUI();
   saveState();
 
-  // Try RawBT, fallback to standard print if it throws an error in non-mobile
   try {
     window.location.href = "rawbt:" + encodeURIComponent(receiptText);
   } catch (err) {
@@ -1001,11 +1123,46 @@ function refreshDeductionsUI() {
 }
 
 /* Master Stock Control */
+function switchInventorySubTab(tabMode) {
+  activeInventoryTab = tabMode;
+  
+  // Update Buttons
+  document.getElementById("sub-tab-menu").classList.remove("active-sub-tab");
+  document.getElementById("sub-tab-ingredients").classList.remove("active-sub-tab");
+  
+  if (tabMode === 'menu') {
+    document.getElementById("sub-tab-menu").classList.add("active-sub-tab");
+    document.getElementById("inv-col-header").innerText = "Menu Item ID";
+  } else {
+    document.getElementById("sub-tab-ingredients").classList.add("active-sub-tab");
+    document.getElementById("inv-col-header").innerText = "Ingredient ID";
+  }
+  
+  repopulateMasterDropdownSelections();
+  refreshInventoryTableUI(currentInvFilter);
+}
+
+function filterInventoryDisplay(mode) {
+  currentInvFilter = mode;
+  document.querySelectorAll(".filter-row button").forEach(function(b) {
+    b.classList.remove("active-filter");
+  });
+  if (mode === "all") document.getElementById("filter-btn-all").classList.add("active-filter");
+  if (mode === "low") document.getElementById("filter-btn-low").classList.add("active-filter");
+  if (mode === "out") document.getElementById("filter-btn-out").classList.add("active-filter");
+  
+  refreshInventoryTableUI(currentInvFilter);
+}
+
 function refreshInventoryTableUI(filter) {
   if (!filter) filter = "all";
+  currentInvFilter = filter;
   var tbody = document.getElementById("inventory-table-body");
   tbody.innerHTML = "";
-  var ids = Object.keys(inventoryDatabaseStore);
+  
+  // Decide which database to draw from based on the active sub-tab
+  var targetDatabase = (activeInventoryTab === 'menu') ? inventoryDatabaseStore : ingredientsDatabaseStore;
+  var ids = Object.keys(targetDatabase);
   
   if (ids.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No inventory rows.</td></tr>';
@@ -1013,30 +1170,24 @@ function refreshInventoryTableUI(filter) {
   }
   
   ids.forEach(function(id) {
-    var row = inventoryDatabaseStore[id];
+    var row = targetDatabase[id];
     if (filter === "low" && row.endingQty >= 10) return;
     if (filter === "out" && row.endingQty > 0) return;
     
     var status = row.endingQty <= 0 ? '<span class="badge bg-danger">OUT</span>' :
       (row.endingQty < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
     var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + id + " / " + row.name + "</td>" +
+    
+    // Add category for ingredients mode so they are easier to read
+    var displayName = (activeInventoryTab === 'ingredients') ? `[${row.category}] ${row.name}` : row.name;
+
+    tr.innerHTML = "<td>" + id + " / " + displayName + "</td>" +
       "<td>" + row.beginningQty + "</td>" +
       "<td>" + (row.changesQty >= 0 ? "+" + row.changesQty : row.changesQty) + "</td>" +
       "<td>" + row.endingQty + "</td>" +
       "<td>" + status + "</td>";
     tbody.appendChild(tr);
   });
-}
-
-function filterInventoryDisplay(mode) {
-  document.querySelectorAll(".filter-row button").forEach(function(b) {
-    b.classList.remove("active-filter");
-  });
-  if (mode === "all") document.getElementById("filter-btn-all").classList.add("active-filter");
-  if (mode === "low") document.getElementById("filter-btn-low").classList.add("active-filter");
-  if (mode === "out") document.getElementById("filter-btn-out").classList.add("active-filter");
-  refreshInventoryTableUI(mode);
 }
 
 function executeSmartStockControllerUpdate() {
@@ -1046,17 +1197,19 @@ function executeSmartStockControllerUpdate() {
   
   if (!target) return alert("Select inventory row");
   
+  var targetDatabase = (activeInventoryTab === 'menu') ? inventoryDatabaseStore : ingredientsDatabaseStore;
+  
   if (mode === "beginning") {
-    inventoryDatabaseStore[target].beginningQty = qty;
-    inventoryDatabaseStore[target].endingQty = qty + inventoryDatabaseStore[target].changesQty;
+    targetDatabase[target].beginningQty = qty;
+    targetDatabase[target].endingQty = qty + targetDatabase[target].changesQty;
   } else if (mode === "add") {
-    inventoryDatabaseStore[target].changesQty += qty;
-    inventoryDatabaseStore[target].endingQty += qty;
+    targetDatabase[target].changesQty += qty;
+    targetDatabase[target].endingQty += qty;
   } else if (mode === "subtract") {
-    inventoryDatabaseStore[target].changesQty -= qty;
-    inventoryDatabaseStore[target].endingQty = Math.max(0, inventoryDatabaseStore[target].endingQty - qty);
+    targetDatabase[target].changesQty -= qty;
+    targetDatabase[target].endingQty = Math.max(0, targetDatabase[target].endingQty - qty);
   }
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   saveState();
 }
 
@@ -1102,8 +1255,6 @@ function buildReportHTMLString() {
 function downloadFinancialSummaryPDF() {
   var reportArea = document.getElementById("report-print-area");
   reportArea.innerHTML = buildReportHTMLString();
-  
-  // Make it briefly visible for html2pdf rendering
   reportArea.style.display = "block";
   
   var opt = {
@@ -1195,7 +1346,7 @@ function resetEntireDailyMasterReport() {
   kitchenPendingQueue = [];
   updateFinancialUI();
   renderKitchenQueueUI();
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   saveState();
 }
 </script>
