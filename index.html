@@ -34,7 +34,6 @@ body {
 }
 .header-banner h2 { margin: 0; font-size: 28px; letter-spacing: 1px; }
 .header-banner p { margin: 5px 0 0 0; font-size: 14px; color: #fff; font-weight: bold; }
-
 /* Navigation Tabs Row */
 .navigation-tabs {
   display: flex;
@@ -60,7 +59,6 @@ body {
   border-bottom: 3px solid var(--yellow);
   transform: scale(1.02);
 }
-
 /* App Sections Dashboard Views */
 .app-section {
   display: none;
@@ -71,7 +69,6 @@ body {
   border: 1px solid #f3ebd4;
 }
 .app-section.active-section { display: block; }
-
 /* Layout Grids */
 .grid-2col {
   display: grid;
@@ -90,7 +87,7 @@ h3 {
   padding-bottom: 5px;
 }
 .menu-category-title {
-  grid-column: 1/-1;
+  grid-column: 1 / -1;
   background: var(--orange);
   color: white;
   padding: 6px 12px;
@@ -123,7 +120,6 @@ h3 {
   display: block;
   margin-top: 5px;
 }
-
 /* Order Basket Table Styles */
 .order-basket {
   background: #fdfdfd;
@@ -134,7 +130,6 @@ h3 {
 .basket-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .basket-table th, .basket-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
 .basket-table th { background: var(--dark); color: white; }
-
 .basket-summary-row {
   margin-top: 15px;
   font-size: 14px;
@@ -169,7 +164,6 @@ button.action-btn {
 button.action-btn:hover { background: var(--orange); }
 button.secondary-btn { background: var(--dark); color: white; }
 button.secondary-btn:hover { background: #444; }
-
 /* Kitchen Orders Styles */
 .order-queue-grid {
   display: grid;
@@ -184,7 +178,6 @@ button.secondary-btn:hover { background: #444; }
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 .order-card h4 { margin: 0 0 10px 0; color: var(--red); border-bottom: 1px solid #ddd; padding-bottom: 5px;}
-
 /* Financial Analytics UI Cards */
 .financial-metric-grid {
   display: grid;
@@ -202,7 +195,6 @@ button.secondary-btn:hover { background: #444; }
 .financial-card.highlight { border-left-color: var(--red); background: #fff2f2; }
 .financial-card h4 { margin: 0 0 5px 0; font-size: 13px; text-transform: uppercase; color: #666; }
 .financial-card p { margin: 0; font-size: 20px; font-weight: bold; color: #222; }
-
 /* Standard Master Data Tables */
 .master-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
 .master-table th, .master-table td { border: 1px solid #e0d9c6; padding: 10px; font-size: 13px; text-align: left; }
@@ -215,7 +207,6 @@ button.secondary-btn:hover { background: #444; }
 .filter-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 .filter-row button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; flex: 1; }
 .filter-row button.active-filter { background: var(--orange); color: white; border-color: var(--orange); }
-
 /* Sub Navigation for Inventory */
 .inventory-sub-nav {
   display: flex;
@@ -245,16 +236,13 @@ button.secondary-btn:hover { background: #444; }
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   transform: translateY(-2px);
 }
-
 /* Print areas hidden by default */
 #receipt-print-area, #report-print-area { display: none; }
-
 /* Print rules */
 @media print {
   body * { visibility: hidden; }
-  
   /* Report Print Mode */
-  body.print-mode-report #report-print-area, 
+  body.print-mode-report #report-print-area,
   body.print-mode-report #report-print-area * {
     visibility: visible;
   }
@@ -269,7 +257,6 @@ button.secondary-btn:hover { background: #444; }
   }
   body.print-mode-report table { width: 100%; border-collapse: collapse; }
   body.print-mode-report th, body.print-mode-report td { border: 1px solid #000; padding: 8px; text-align: left; }
-
   /* Receipt Print Mode */
   body.print-mode-receipt #receipt-print-area,
   body.print-mode-receipt #receipt-print-area * {
@@ -288,12 +275,10 @@ button.secondary-btn:hover { background: #444; }
 </style>
 </head>
 <body>
-
 <div class="header-banner">
   <h2>Silogan ni Joy</h2>
   <p>Integrated POS Register & Inventory Control Master Matrix</p>
 </div>
-
 <div class="navigation-tabs">
   <button class="tab-button active-tab" onclick="switchAppTab('pos-section')">POS</button>
   <button class="tab-button" onclick="switchAppTab('orders-section')">QUEUE <span id="queue-count-badge" class="badge bg-danger">0</span></button>
@@ -308,7 +293,6 @@ button.secondary-btn:hover { background: #444; }
       <h3>Interactive Menu Layout</h3>
       <div id="pos-menu-grid" class="grid-cards"></div>
     </div>
-    
     <div class="order-basket">
       <h3>Order Basket</h3>
       <div style="max-height: 220px; overflow-y:auto; margin-bottom: 10px;">
@@ -344,8 +328,7 @@ button.secondary-btn:hover { background: #444; }
           <span>Change Due:</span><span id="pos-change-due">PHP 0.00</span>
         </div>
       </div>
-      
-      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip</button>
+      <button class="action-btn" style="margin-top: 10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip</button>
       <button class="action-btn secondary-btn" onclick="clearActiveBasket()">Cancel Order</button>
     </div>
   </div>
@@ -361,7 +344,7 @@ button.secondary-btn:hover { background: #444; }
 <div id="financials-section" class="app-section">
   <h3>Daily Business Metrics Summary Board</h3>
   <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border: 1px solid #e6dfcc;">
-    <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
+    <label style="font-weight:bold; font-size: 14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
     <input type="number" id="starting-cash-input" value="1000" style="width:200px; display:inline-block; margin:0 10px;" oninput="updateFinancialUI()">
   </div>
   
@@ -373,7 +356,7 @@ button.secondary-btn:hover { background: #444; }
     <div class="financial-card highlight"><h4>Net Cash on Hand</h4><p id="financial-net-cash">PHP 1000.00</p></div>
     <div class="financial-card"><h4>Transactions Served</h4><p id="ui-order-count">0</p></div>
   </div>
-
+  
   <div class="grid-2col" style="margin-top:25px;">
     <!-- Manual Adjustments and Expenses -->
     <div>
@@ -394,7 +377,7 @@ button.secondary-btn:hover { background: #444; }
         <input type="number" id="adj-metric-value" placeholder="0.00" style="padding:6px; margin-bottom:8px;">
         <button class="action-btn" style="background: var(--orange); padding: 8px; margin:0;" onclick="applyManualFinancialAdjustment()">Apply Override</button>
       </div>
-
+      
       <h3>Record Operating Expense / Payout</h3>
       <label>Deduction Stream Line:</label>
       <select id="expense-type-select">
@@ -409,7 +392,7 @@ button.secondary-btn:hover { background: #444; }
       <input type="number" id="expense-amount-input" placeholder="0.00">
       <button class="action-btn" onclick="addNewDeductionEntry()">Log Expense Line Item</button>
     </div>
-
+    
     <!-- Tables for Summary Orders & Audits -->
     <div>
       <h3>Summarized Orders (All Sales Volumes)</h3>
@@ -421,7 +404,7 @@ button.secondary-btn:hover { background: #444; }
           </tbody>
         </table>
       </div>
-
+      
       <h3>Itemized Ledger Audit Log</h3>
       <div style="max-height:200px; overflow-y:auto;">
         <table class="master-table">
@@ -445,13 +428,12 @@ button.secondary-btn:hover { background: #444; }
 <!-- Inventory View -->
 <div id="inventory-section" class="app-section">
   <h3>Master System Stock Controller</h3>
-  
   <!-- Sub Navigation strictly mapped to requested Classifications -->
   <div class="inventory-sub-nav">
-    <button id="sub-tab-products" class="action-btn active-sub-tab" onclick="switchInventorySubTab('products')">🛒 PRODUCTS<br><small>(Silogs, BBQ, & Menu Items)</small></button>
-    <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">🥩 INGREDIENTS<br><small>(List items, Raw Supplies, Drinks)</small></button>
+    <button id="sub-tab-products" class="action-btn active-sub-tab" onclick="switchInventorySubTab('products')">PRODUCTS<br><small>(Silogs, BBQ, & Menu Items)</small></button>
+    <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">INGREDIENTS<br><small>(List items, Raw Supplies, Drinks)</small></button>
   </div>
-
+  
   <div class="filter-row">
     <button id="filter-btn-all" class="active-filter" onclick="filterInventoryDisplay('all')">View All Stock Rows</button>
     <button id="filter-btn-low" onclick="filterInventoryDisplay('low')">Low Stock Alerts (&lt; 10)</button>
@@ -467,6 +449,7 @@ button.secondary-btn:hover { background: #444; }
         </table>
       </div>
     </div>
+    
     <div style="background:#fffdf6; padding:20px; border-radius: 6px; border:2px dashed var(--yellow);">
       <h3>Modify Active Stock Parameters</h3>
       <label>Select Target Inventory Row: </label>
@@ -518,9 +501,9 @@ var bbqItems = [
   { name: "PORK BBQ", price: 35},
   { name: "CHICKEN INASAL", price: 120 }
 ];
-  
+
 var extrasItems = [
-  { name: "EGG", price: 15 },
+  { name: "EGG", price: 15},
   { name: "PLAIN RICE", price: 20 },
   { name: "FRIED RICE", price: 25 },
   { name: "FRIES BBQ", price: 50},
@@ -533,8 +516,8 @@ var extrasItems = [
 var drinksItems = [
   { name: "COKE", price: 30 },
   { name: "MOUNTAIN DEW", price: 30 },
-  { name: "SODA GREEN APPLE", price: 49 },
-  { name: "SODA BLUEBERRY", price: 49 },
+  { name: "SODA GREEN APPLE", price: 49},
+  { name: "SODA BLUEBERRY", price: 49},
   { name: "SODA LEMON", price: 49},
   { name: "SODA MANGO", price: 49},
   { name: "SODA WATERMELON", price: 49},
@@ -546,7 +529,7 @@ var drinksItems = [
   { name: "MINERAL WATER", price: 25 }
 ];
 
-/* Raw Ingredients Database (Sourced exclusively from SILOGAN DAILY INVENTORY LOG.pdf) */
+/* Raw Ingredients Database */
 var rawIngredientsList = [
   // MAIN INGREDIENTS
   { name: "Rice (kg)", category: "Main Ingredients" },
@@ -621,12 +604,10 @@ var systemMenuCatalog = [];
 var systemIngredientsCatalog = [];
 var itemIndexCounter = 1;
 var ingredientIndexCounter = 1;
-
-var productsDatabaseStore = {}; // Maps to POS Menu Items
-var ingredientsDatabaseStore = {}; // Maps to Raw List from PDF
-var activeInventoryTab = 'products'; // 'products' or 'ingredients'
+var productsDatabaseStore = {};
+var ingredientsDatabaseStore = {};
+var activeInventoryTab = 'products'; 
 var currentInvFilter = 'all';
-
 var activeBasketArray = [];
 var kitchenPendingQueue = [];
 var itemizedDeductionsLedger = [];
@@ -644,7 +625,6 @@ window.onload = function() {
 function populateSystemMasterCatalogArrays() {
   systemMenuCatalog = [];
   itemIndexCounter = 1;
-  
   silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
   bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ and Others", defaultPrice: i.price }); });
   extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
@@ -669,7 +649,7 @@ function initializeInventoryStorageToZero() {
   });
 }
 
-/* State Persistence - NOTE: Changed Key to _v3 to prevent browser caching */
+/* State Persistence */
 function saveState() {
   var startCashEl = document.getElementById("starting-cash-input");
   var discSelEl = document.getElementById("pos-discount-select");
@@ -686,6 +666,7 @@ function saveState() {
     discountSelect: discSelEl ? discSelEl.value : "0",
     paymentMethod: payMethEl ? payMethEl.value : "cash"
   };
+  
   try {
     localStorage.setItem("siloganNiJoy_State_v3", JSON.stringify(state));
   } catch (e) {
@@ -738,9 +719,9 @@ function switchAppTab(targetSectionId) {
   document.querySelectorAll(".tab-button").forEach(function(tabButton) {
     tabButton.classList.remove("active-tab");
   });
+  
   document.getElementById(targetSectionId).classList.add("active-section");
   var tabs = document.querySelectorAll(".navigation-tabs button");
-  
   if (targetSectionId === "pos-section") tabs[0].classList.add("active-tab");
   if (targetSectionId === "orders-section") tabs[1].classList.add("active-tab");
   if (targetSectionId === "financials-section") {
@@ -756,7 +737,6 @@ function switchAppTab(targetSectionId) {
 function repopulateMasterDropdownSelections() {
   var inventorySelect = document.getElementById("inventory-target-select");
   inventorySelect.innerHTML = "";
-  
   var targetCatalog = (activeInventoryTab === 'products') ? systemMenuCatalog : systemIngredientsCatalog;
   var categories = {};
   
@@ -783,11 +763,13 @@ function renderInteractivePOSMenuUI() {
   var displayContainer = document.getElementById("pos-menu-grid");
   displayContainer.innerHTML = "";
   var categories = [];
+  
   systemMenuCatalog.forEach(function(item) {
     if (categories.indexOf(item.category) === -1) {
       categories.push(item.category);
     }
   });
+  
   categories.forEach(function(categoryName) {
     var header = document.createElement("div");
     header.className = "menu-category-title";
@@ -797,6 +779,7 @@ function renderInteractivePOSMenuUI() {
     var itemsInCategory = systemMenuCatalog.filter(function(i) {
       return i.category === categoryName;
     });
+    
     itemsInCategory.forEach(function(menuItem) {
       var card = document.createElement("div");
       card.className = "item-card";
@@ -816,7 +799,7 @@ function addItemToOrderBasket(menuItemId) {
   if (verifiedInv && verifiedInv.endingQty <= 0) {
     if (!confirm("STOCK WARNING: Product \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
   }
-
+  
   var existingMatch = activeBasketArray.find(function(entry) { return entry.id === menuItemId; });
   if (existingMatch) {
     existingMatch.qty++;
@@ -859,6 +842,7 @@ function clearActiveBasket() {
 function recalculateBasketTotals() {
   var basketContainer = document.getElementById("basket-entries");
   basketContainer.innerHTML = "";
+  
   if (activeBasketArray.length === 0) {
     basketContainer.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Order basket is completely empty.</td></tr>';
     document.getElementById("summary-subtotal").innerText = "PHP 0.00";
@@ -870,6 +854,7 @@ function recalculateBasketTotals() {
   
   var subtotal = 0;
   var highestItemPrice = 0;
+  
   activeBasketArray.forEach(function(basketRow) {
     var totalRowPrice = basketRow.qty * basketRow.price;
     subtotal += totalRowPrice;
@@ -878,15 +863,14 @@ function recalculateBasketTotals() {
     }
     var tr = document.createElement("tr");
     tr.innerHTML = "<td><strong>" + basketRow.name + "</strong></td>" +
-      "<td>" + basketRow.qty + "</td>" +
-      "<td>PHP " + totalRowPrice.toFixed(2) + "</td>" +
-      "<td><button style='background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;' " +
-      "onclick=\"removeBasketItemUnit('" + basketRow.id + "')\">X</button></td>";
+                   "<td>" + basketRow.qty + "</td>" +
+                   "<td>PHP " + totalRowPrice.toFixed(2) + "</td>" +
+                   "<td><button style='background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;' onclick=\"removeBasketItemUnit('" + basketRow.id + "')\">X</button></td>";
     basketContainer.appendChild(tr);
   });
   
   var discRate = parseFloat(document.getElementById("pos-discount-select").value) || 0;
-  var discVal = (discRate > 0) ? (highestItemPrice * (discRate / 100)) : 0;
+  var discVal = (discRate > 0) ? (highestItemPrice * (discRate/100)) : 0;
   var grandTotal = Math.max(0, subtotal - discVal);
   
   document.getElementById("summary-subtotal").innerText = "PHP " + subtotal.toFixed(2);
@@ -920,7 +904,6 @@ function executePOSCheckoutOrder() {
   }
   
   var ticketId = "SNJ-" + Math.floor(1000 + Math.random() * 9000);
-  
   var receiptText = "";
   receiptText += "SILOGAN NI JOY\n";
   receiptText += "POS Operational Ticket\n";
@@ -931,22 +914,24 @@ function executePOSCheckoutOrder() {
   
   activeBasketArray.forEach(function(item) {
     receiptText += item.qty + "x " + item.name + "\n";
-    receiptText += " PHP " + (item.qty * item.price).toFixed(2) + "\n";
+    receiptText += "PHP " + (item.qty * item.price).toFixed(2) + "\n";
   });
   
   receiptText += "----\n";
   receiptText += "TOTAL DUE: PHP " + totalPayable.toFixed(2) + "\n";
   receiptText += "PAYMENT: " + payMethod.toUpperCase() + "\n";
+  
   if (payMethod === "cash") {
     receiptText += "CASH TENDERED: PHP " + cashAmount.toFixed(2) + "\n";
     receiptText += "CHANGE: PHP " + Math.max(0, cashAmount - totalPayable).toFixed(2) + "\n";
   }
+  
   receiptText += "------\n";
   receiptText += "Thank you for dining with us!\n\n\n\n";
-
+  
   var receiptPrintEl = document.getElementById("receipt-print-area");
   receiptPrintEl.innerHTML = "<pre>" + receiptText + "</pre>";
-
+  
   // Deductions from Products Inventory and Daily Reports
   activeBasketArray.forEach(function(row) {
     if (productsDatabaseStore[row.id]) {
@@ -956,29 +941,31 @@ function executePOSCheckoutOrder() {
   });
   
   dailyReport.totalSales += totalPayable;
+  
   if (payMethod === "cash") {
     dailyReport.cashSales += totalPayable;
   } else {
     dailyReport.onlineSales += totalPayable;
   }
+  
   dailyReport.orderCount++;
-
+  
   kitchenPendingQueue.push({
     ticketId: ticketId,
     timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     items: JSON.parse(JSON.stringify(activeBasketArray))
   });
-
+  
   activeBasketArray = [];
   document.getElementById("pos-discount-select").value = "0";
   document.getElementById("pos-cash-tendered").value = "";
-  recalculateBasketTotals();
   
+  recalculateBasketTotals();
   renderKitchenQueueUI();
   refreshInventoryTableUI(currentInvFilter);
   updateFinancialUI();
   saveState();
-
+  
   try {
     window.location.href = "rawbt:" + encodeURIComponent(receiptText);
   } catch (err) {
@@ -990,19 +977,22 @@ function executePOSCheckoutOrder() {
 function renderKitchenQueueUI() {
   var container = document.getElementById("kitchen-queue-display");
   container.innerHTML = "";
+  
   kitchenPendingQueue.forEach(function(ticket) {
     var card = document.createElement("div");
     card.className = "order-card";
     var itemsHtml = "";
+    
     ticket.items.forEach(function(it) {
       itemsHtml += "<div>" + it.qty + " x " + it.name + "</div>";
     });
-    card.innerHTML = "<h4>Ticket " + ticket.ticketId + " <small style='float:right'>" + ticket.timestamp + "</small></h4>" +
-      "<div>" + itemsHtml + "</div>" +
-      "<button class='action-btn' style='margin-top: 15px; background: #28a745; padding: 8px;' " +
-      "onclick=\"markOrderAsServed('" + ticket.ticketId + "')\">Mark as Served</button>";
+    
+    card.innerHTML = "<h4>Ticket " + ticket.ticketId + "<small style='float:right'>" + ticket.timestamp + "</small></h4>" +
+                     "<div>" + itemsHtml + "</div>" +
+                     "<button class='action-btn' style='margin-top: 15px; background: #28a745; padding: 8px;' onclick=\"markOrderAsServed('" + ticket.ticketId + "')\">Mark as Served</button>";
     container.appendChild(card);
   });
+  
   document.getElementById("queue-count-badge").innerText = kitchenPendingQueue.length;
 }
 
@@ -1026,8 +1016,8 @@ function updateFinancialUI() {
   
   var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
   var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-  document.getElementById("financial-net-cash").innerText = "PHP " + netCash.toFixed(2);
   
+  document.getElementById("financial-net-cash").innerText = "PHP " + netCash.toFixed(2);
   document.getElementById("ui-order-count").innerText = dailyReport.orderCount;
   
   refreshSummarizedOrdersUI();
@@ -1038,6 +1028,7 @@ function updateFinancialUI() {
 function applyManualFinancialAdjustment() {
   var target = document.getElementById("adj-metric-target").value;
   var val = parseFloat(document.getElementById("adj-metric-value").value) || 0;
+  
   if (!val) return;
   
   switch (target) {
@@ -1050,6 +1041,7 @@ function applyManualFinancialAdjustment() {
     case "orderCount_add": dailyReport.orderCount += val; break;
     case "orderCount_sub": dailyReport.orderCount = Math.max(0, dailyReport.orderCount - val); break;
   }
+  
   document.getElementById("adj-metric-value").value = "";
   updateFinancialUI();
   saveState();
@@ -1076,6 +1068,7 @@ function addNewDeductionEntry() {
 function refreshSummarizedOrdersUI() {
   var tbody = document.getElementById("summarized-orders-display-body");
   tbody.innerHTML = "";
+  
   var items = dailyReport.itemsSold;
   var keys = Object.keys(items);
   
@@ -1087,7 +1080,7 @@ function refreshSummarizedOrdersUI() {
   keys.forEach(function(name) {
     var tr = document.createElement("tr");
     tr.innerHTML = "<td>" + name + "</td><td>" + items[name] + "</td>" +
-      "<td><button class='action-btn' style='margin:0; padding:4px 8px; width:auto; background:var(--red);' onclick=\"removeSummarizedItemQuantity('" + name + "')\">-</button></td>";
+                   "<td><button class='action-btn' style='margin:0; padding:4px 8px; width:auto; background:var(--red);' onclick=\"removeSummarizedItemQuantity('" + name + "')\">-</button></td>";
     tbody.appendChild(tr);
   });
 }
@@ -1107,6 +1100,7 @@ function removeSummarizedItemQuantity(itemName) {
 function refreshDeductionsUI() {
   var tbody = document.getElementById("deductions-table-body");
   tbody.innerHTML = "";
+  
   if (itemizedDeductionsLedger.length === 0) {
     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No operational ledger changes recorded.</td></tr>';
     return;
@@ -1144,6 +1138,7 @@ function filterInventoryDisplay(mode) {
   document.querySelectorAll(".filter-row button").forEach(function(b) {
     b.classList.remove("active-filter");
   });
+  
   if (mode === "all") document.getElementById("filter-btn-all").classList.add("active-filter");
   if (mode === "low") document.getElementById("filter-btn-low").classList.add("active-filter");
   if (mode === "out") document.getElementById("filter-btn-out").classList.add("active-filter");
@@ -1171,16 +1166,15 @@ function refreshInventoryTableUI(filter) {
     if (filter === "out" && row.endingQty > 0) return;
     
     var status = row.endingQty <= 0 ? '<span class="badge bg-danger">OUT</span>' :
-      (row.endingQty < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
+                 (row.endingQty < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
+                 
     var tr = document.createElement("tr");
-    
     var displayName = `[${row.category}] ${row.name}`;
-
     tr.innerHTML = "<td><strong>" + id + "</strong><br>" + displayName + "</td>" +
-      "<td>" + row.beginningQty + "</td>" +
-      "<td>" + (row.changesQty >= 0 ? "+" + row.changesQty : row.changesQty) + "</td>" +
-      "<td>" + row.endingQty + "</td>" +
-      "<td>" + status + "</td>";
+                   "<td>" + row.beginningQty + "</td>" +
+                   "<td>" + (row.changesQty >= 0 ? "+" + row.changesQty : row.changesQty) + "</td>" +
+                   "<td>" + row.endingQty + "</td>" +
+                   "<td>" + status + "</td>";
     tbody.appendChild(tr);
   });
 }
@@ -1204,6 +1198,7 @@ function executeSmartStockControllerUpdate() {
     targetDatabase[target].changesQty -= qty;
     targetDatabase[target].endingQty = Math.max(0, targetDatabase[target].endingQty - qty);
   }
+  
   refreshInventoryTableUI(currentInvFilter);
   saveState();
 }
@@ -1225,26 +1220,26 @@ function buildReportHTMLString() {
   var netCash = startingCash + dailyReport.cashSales - totalDeductions;
   
   return "<h2>Silogan ni Joy Daily Financial Summary</h2>" +
-    "<p><strong>Date: </strong>" + new Date().toLocaleDateString() + "</p>" +
-    "<h3>Financial Metrics</h3>" +
-    "<table>" +
-    "<tr><th>Gross Sales</th><td>PHP " + dailyReport.totalSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Cash Sales</th><td>PHP " + dailyReport.cashSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Online Sales</th><td>PHP " + dailyReport.onlineSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Total Deductions</th><td>PHP " + totalDeductions.toFixed(2) + "</td></tr>" +
-    "<tr><th>Net Cash on Hand</th><td>PHP " + netCash.toFixed(2) + "</td></tr>" +
-    "<tr><th>Transactions</th><td>" + dailyReport.orderCount + "</td></tr>" +
-    "</table>" +
-    "<h3>Items Sold</h3>" +
-    "<table>" +
-    "<thead><tr><th>Item</th><th>Qty</th></tr></thead>" +
-    "<tbody>" + (itemsRows || "<tr><td colspan='2'>No items sold</td></tr>") + "</tbody>" +
-    "</table>" +
-    "<h3>Ledger Deductions</h3>" +
-    "<table>" +
-    "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
-    "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
-    "</table>";
+         "<p><strong>Date: </strong>" + new Date().toLocaleDateString() + "</p>" +
+         "<h3>Financial Metrics</h3>" +
+         "<table>" +
+         "<tr><th>Gross Sales</th><td>PHP " + dailyReport.totalSales.toFixed(2) + "</td></tr>" +
+         "<tr><th>Cash Sales</th><td>PHP " + dailyReport.cashSales.toFixed(2) + "</td></tr>" +
+         "<tr><th>Online Sales</th><td>PHP " + dailyReport.onlineSales.toFixed(2) + "</td></tr>" +
+         "<tr><th>Total Deductions</th><td>PHP " + totalDeductions.toFixed(2) + "</td></tr>" +
+         "<tr><th>Net Cash on Hand</th><td>PHP " + netCash.toFixed(2) + "</td></tr>" +
+         "<tr><th>Transactions</th><td>" + dailyReport.orderCount + "</td></tr>" +
+         "</table>" +
+         "<h3>Items Sold</h3>" +
+         "<table>" +
+         "<thead><tr><th>Item</th><th>Qty</th></tr></thead>" +
+         "<tbody>" + (itemsRows || "<tr><td colspan='2'>No items sold</td></tr>") + "</tbody>" +
+         "</table>" +
+         "<h3>Ledger Deductions</h3>" +
+         "<table>" +
+         "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
+         "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
+         "</table>";
 }
 
 function downloadFinancialSummaryPDF() {
@@ -1253,11 +1248,11 @@ function downloadFinancialSummaryPDF() {
   reportArea.style.display = "block";
   
   var opt = {
-    margin:       0.5,
-    filename:     'Financial_Summary_' + new Date().toISOString().slice(0,10) + '.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    margin: 0.5,
+    filename: 'Financial_Summary_' + new Date().toISOString().slice(0,10) + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
   
   html2pdf().set(opt).from(reportArea).save().then(function() {
@@ -1268,8 +1263,8 @@ function downloadFinancialSummaryPDF() {
 function printFinancialSummaryWeb() {
   var reportArea = document.getElementById("report-print-area");
   reportArea.innerHTML = buildReportHTMLString();
-  
   document.body.classList.add("print-mode-report");
+  
   setTimeout(function() {
     try {
       window.print();
@@ -1304,6 +1299,7 @@ function printFinancialSummaryRawBT() {
   summaryText += "PHP " + netCash.toFixed(2) + "\n";
   summaryText += "------\n";
   summaryText += "ITEMS SOLD:\n";
+  
   var itemsKeys = Object.keys(dailyReport.itemsSold);
   if (itemsKeys.length === 0) {
     summaryText += "No items sold today.\n";
@@ -1312,6 +1308,7 @@ function printFinancialSummaryRawBT() {
       summaryText += dailyReport.itemsSold[key] + "x " + key + "\n";
     });
   }
+  
   summaryText += "---\n";
   summaryText += "DEDUCTIONS LEDGER:\n";
   if (itemizedDeductionsLedger.length === 0) {
@@ -1320,9 +1317,10 @@ function printFinancialSummaryRawBT() {
     itemizedDeductionsLedger.forEach(function(d) {
       summaryText += "[" + d.category + "]\n";
       summaryText += (d.description || "Expenses") + "\n";
-      summaryText += " PHP " + d.amount.toFixed(2) + "\n";
+      summaryText += "PHP " + d.amount.toFixed(2) + "\n";
     });
   }
+  
   summaryText += "-----\n";
   summaryText += "End of Report\n\n\n\n";
   
@@ -1336,9 +1334,11 @@ function printFinancialSummaryRawBT() {
 
 function resetEntireDailyMasterReport() {
   if (!confirm("Reset all daily financial data?")) return;
+  
   dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
   itemizedDeductionsLedger = [];
   kitchenPendingQueue = [];
+  
   updateFinancialUI();
   renderKitchenQueueUI();
   refreshInventoryTableUI(currentInvFilter);
