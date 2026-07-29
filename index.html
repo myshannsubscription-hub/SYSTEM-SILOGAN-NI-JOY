@@ -518,10 +518,6 @@ var bbqItems = [
   { name: "CHICKEN INASAL", price: 120 }
 ];
 
-  var otherItems = [
-  { name: "Pares", price: 99 },
-];
-
 var extrasItems = [
   { name: "EGG", price: 15 },
   { name: "PLAIN RICE", price: 20 },
@@ -650,7 +646,6 @@ function populateSystemMasterCatalogArrays() {
   
   silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
   bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
-  othersItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
   extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
   drinksItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price }); });
 
@@ -1351,6 +1346,3 @@ function resetEntireDailyMasterReport() {
 </script>
 </body>
 </html>
-
-
-
