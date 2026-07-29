@@ -88,7 +88,7 @@ h3 {
   padding-bottom: 5px;
 }
 .menu-category-title {
-  grid-column: 1 / -1;
+  grid-column: 1/-1;
   background: var(--orange);
   color: white;
   padding: 6px 12px;
@@ -132,6 +132,7 @@ h3 {
 .basket-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .basket-table th, .basket-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
 .basket-table th { background: var(--dark); color: white; }
+
 .basket-summary-row {
   margin-top: 15px;
   font-size: 14px;
@@ -209,15 +210,38 @@ button.secondary-btn:hover { background: #444; }
 .badge.bg-danger { background-color: var(--red); }
 .badge.bg-warning { background-color: var(--orange); color: var(--dark); }
 .badge.bg-success { background-color: #28a745; }
-.filter-row { display: flex; gap: 10px; margin-bottom: 15px; }
-.filter-row button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; }
+.filter-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+.filter-row button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; flex: 1; }
 .filter-row button.active-filter { background: var(--orange); color: white; border-color: var(--orange); }
-.costing-summary-box {
-  background: #f7f9fa;
-  border: 1px solid #ced4da;
+
+/* Sub Navigation for Inventory */
+.inventory-sub-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 3px solid #ccc;
+  padding-bottom: 15px;
+}
+.inventory-sub-nav button {
+  flex: 1;
   padding: 15px;
+  margin: 0;
+  font-size: 16px;
+  background: #e0e0e0;
+  color: #333;
   border-radius: 6px;
-  margin-top: 15px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+.inventory-sub-nav button:hover {
+  background: #d4d4d4;
+}
+.inventory-sub-nav button.active-sub-tab {
+  background: var(--red);
+  color: white;
+  border-color: var(--dark);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
 /* Print areas hidden by default */
@@ -225,46 +249,44 @@ button.secondary-btn:hover { background: #444; }
 
 /* Print rules */
 @media print {
-  body { display: none !important; }
-  body.print-mode-receipt #receipt-print-area {
-    display: block !important;
-    visibility: visible !important;
-    position: absolute !important;
-    left: 0 !important; top: 0 !important;
-    width: 70mm !important; max-width: 70mm !important;
-    padding: 2mm !important;
-    font-family: monospace !important;
-    box-sizing: border-box !important;
-    background: #fff !important; color: #000 !important;
-    font-size: 11px !important;
+  body * { visibility: hidden; }
+  
+  /* Report Print Mode */
+  body.print-mode-report #report-print-area, 
+  body.print-mode-report #report-print-area * {
+    visibility: visible;
   }
-  body.print-mode-receipt .receipt-line {
-    border-top: 1px dashed #000 !important;
-    margin: 5px 0 !important; width: 100% !important; display: block !important;
-  }
-  body.print-mode-receipt .receipt-row {
-    display: flex !important; justify-content: space-between !important; width: 100% !important; gap: 4px !important;
-  }
-  body.print-mode-receipt .center-text { text-align: center !important; width: 100% !important; display: block !important; }
-
   body.print-mode-report #report-print-area {
     display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    position: absolute !important;
-    left: 0 !important; top: 0 !important;
-    padding: 10mm !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    box-sizing: border-box !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 15px;
+    background: white;
   }
-  body.print-mode-report table { width: 100% !important; border-collapse: collapse !important; }
-  body.print-mode-report th { background-color: var(--dark) !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  body.print-mode-report td, body.print-mode-report th { border: 1px solid #ddd !important; padding: 8px !important; }
+  body.print-mode-report table { width: 100%; border-collapse: collapse; }
+  body.print-mode-report th, body.print-mode-report td { border: 1px solid #000; padding: 8px; text-align: left; }
+
+  /* Receipt Print Mode */
+  body.print-mode-receipt #receipt-print-area,
+  body.print-mode-receipt #receipt-print-area * {
+    visibility: visible;
+  }
+  body.print-mode-receipt #receipt-print-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    font-family: monospace;
+    font-size: 12px;
+  }
 }
 </style>
 </head>
 <body>
+
 <div class="header-banner">
   <h2>Silogan ni Joy</h2>
   <p>Integrated POS Register & Inventory Control Master Matrix</p>
@@ -275,7 +297,6 @@ button.secondary-btn:hover { background: #444; }
   <button class="tab-button" onclick="switchAppTab('orders-section')">QUEUE <span id="queue-count-badge" class="badge bg-danger">0</span></button>
   <button class="tab-button" onclick="switchAppTab('financials-section')">FINANCIAL SUMMARY</button>
   <button class="tab-button" onclick="switchAppTab('inventory-section')">INVENTORY</button>
-  <button class="tab-button" onclick="switchAppTab('recipe-section')">COSTING</button>
 </div>
 
 <!-- POS View -->
@@ -285,9 +306,10 @@ button.secondary-btn:hover { background: #444; }
       <h3>Interactive Menu Layout</h3>
       <div id="pos-menu-grid" class="grid-cards"></div>
     </div>
+    
     <div class="order-basket">
       <h3>Order Basket</h3>
-      <div style="max-height: 220px; overflow-y:auto; margin-bottom:10px;">
+      <div style="max-height: 220px; overflow-y:auto; margin-bottom: 10px;">
         <table class="basket-table">
           <thead>
             <tr><th>Item Name</th><th>Qty</th><th>Price</th><th>Action</th></tr>
@@ -308,7 +330,7 @@ button.secondary-btn:hover { background: #444; }
       <div class="basket-summary-row"><span>Discount Value:</span><span id="summary-discount">PHP 0.00</span></div>
       <div class="basket-summary-row grand-total"><span>Amount Due:</span><span id="summary-grand-total">PHP 0.00</span></div>
       
-      <div style="margin-top: 15px; background:#eee; padding:10px; border-radius: 5px;">
+      <div style="margin-top: 15px; background:#eee; padding: 10px; border-radius: 5px;">
         <label style="font-size: 12px; font-weight:bold; display:block; margin-bottom:2px;">Payment Method: </label>
         <select id="pos-payment-method">
           <option value="cash">Cash</option>
@@ -320,7 +342,8 @@ button.secondary-btn:hover { background: #444; }
           <span>Change Due:</span><span id="pos-change-due">PHP 0.00</span>
         </div>
       </div>
-      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip & Print</button>
+      
+      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip</button>
       <button class="action-btn secondary-btn" onclick="clearActiveBasket()">Cancel Order</button>
     </div>
   </div>
@@ -335,7 +358,7 @@ button.secondary-btn:hover { background: #444; }
 <!-- Financial Summary View -->
 <div id="financials-section" class="app-section">
   <h3>Daily Business Metrics Summary Board</h3>
-  <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border:1px solid #e6dfcc;">
+  <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border: 1px solid #e6dfcc;">
     <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
     <input type="number" id="starting-cash-input" value="1000" style="width:200px; display:inline-block; margin:0 10px;" oninput="updateFinancialUI()">
   </div>
@@ -348,10 +371,11 @@ button.secondary-btn:hover { background: #444; }
     <div class="financial-card highlight"><h4>Net Cash on Hand</h4><p id="financial-net-cash">PHP 1000.00</p></div>
     <div class="financial-card"><h4>Transactions Served</h4><p id="ui-order-count">0</p></div>
   </div>
-  
+
   <div class="grid-2col" style="margin-top:25px;">
+    <!-- Manual Adjustments and Expenses -->
     <div>
-      <div style="background:#fffbf0; border:1px dashed var(--orange); padding:15px; border-radius: 6px; margin-bottom:20px;">
+      <div style="background:#fffbf0; border:1px dashed var(--orange); padding: 15px; border-radius: 6px; margin-bottom:20px;">
         <h4 style="margin-top:0; color:var(--orange);">Manual Summary Counters Overrides</h4>
         <label style="font-size: 12px; font-weight:bold;">Select Counter Vector:</label>
         <select id="adj-metric-target" style="padding:6px; margin-bottom:8px;">
@@ -364,11 +388,11 @@ button.secondary-btn:hover { background: #444; }
           <option value="orderCount_add">Increment Total Transactions Count</option>
           <option value="orderCount_sub">Decrement Total Transactions Count</option>
         </select>
-        <label style="font-size:12px; font-weight:bold;">Adjustment Entry Value:</label>
+        <label style="font-size: 12px; font-weight:bold;">Adjustment Entry Value:</label>
         <input type="number" id="adj-metric-value" placeholder="0.00" style="padding:6px; margin-bottom:8px;">
         <button class="action-btn" style="background: var(--orange); padding: 8px; margin:0;" onclick="applyManualFinancialAdjustment()">Apply Override</button>
       </div>
-      
+
       <h3>Record Operating Expense / Payout</h3>
       <label>Deduction Stream Line:</label>
       <select id="expense-type-select">
@@ -383,10 +407,11 @@ button.secondary-btn:hover { background: #444; }
       <input type="number" id="expense-amount-input" placeholder="0.00">
       <button class="action-btn" onclick="addNewDeductionEntry()">Log Expense Line Item</button>
     </div>
-    
+
+    <!-- Tables for Summary Orders & Audits -->
     <div>
       <h3>Summarized Orders (All Sales Volumes)</h3>
-      <div style="max-height:250px; overflow-y:auto; margin-bottom:20px; border:1px solid #e0d9c6; border-radius:4px;">
+      <div style="max-height:250px; overflow-y:auto; margin-bottom:20px; border: 1px solid #e0d9c6; border-radius:4px;">
         <table class="master-table" style="margin-top:0;">
           <thead><tr><th>Item Name</th><th>Qty Sold</th><th>Action</th></tr></thead>
           <tbody id="summarized-orders-display-body">
@@ -394,11 +419,11 @@ button.secondary-btn:hover { background: #444; }
           </tbody>
         </table>
       </div>
-      
+
       <h3>Itemized Ledger Audit Log</h3>
       <div style="max-height:200px; overflow-y:auto;">
         <table class="master-table">
-          <thead><tr><th>Category</th><th>Description / Payee</th><th>Amount</th></tr></thead>
+          <thead><tr><th>Category</th><th>Description/Payee</th><th>Amount</th></tr></thead>
           <tbody id="deductions-table-body">
             <tr><td colspan="3" style="text-align:center; color:#999;">No operational ledger changes recorded.</td></tr>
           </tbody>
@@ -408,8 +433,8 @@ button.secondary-btn:hover { background: #444; }
   </div>
   
   <div style="margin-top:30px; display: flex; gap:15px; flex-wrap: wrap;">
-    <button type="button" class="action-btn" style="background: #28a745;" onclick="printFinancialSummaryRawBT()">Print Summary</button>
-    <button type="button" class="action-btn" style="background: #17a2b8;" onclick="downloadFinancialSummaryPDF()">Download PDF File</button>
+    <button type="button" class="action-btn" style="background: #28a745;" onclick="printFinancialSummaryRawBT()">Print Summary (RawBT)</button>
+    <button type="button" class="action-btn" style="background: #6f42c1;" onclick="printFinancialSummaryWeb()">Standard Web Print</button>
     <button type="button" class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
   </div>
 </div>
@@ -417,6 +442,13 @@ button.secondary-btn:hover { background: #444; }
 <!-- Inventory View -->
 <div id="inventory-section" class="app-section">
   <h3>Master System Stock Controller</h3>
+  
+  <!-- Sub Navigation strictly mapped to requested Classifications -->
+  <div class="inventory-sub-nav">
+    <button id="sub-tab-products" class="action-btn active-sub-tab" onclick="switchInventorySubTab('products')">🛒 PRODUCTS<br><small>(Silogs, BBQ, & Others)</small></button>
+    <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">🥩 INGREDIENTS<br><small>(List items, Raw Supplies, Drinks)</small></button>
+  </div>
+
   <div class="filter-row">
     <button id="filter-btn-all" class="active-filter" onclick="filterInventoryDisplay('all')">View All Stock Rows</button>
     <button id="filter-btn-low" onclick="filterInventoryDisplay('low')">Low Stock Alerts (&lt; 10)</button>
@@ -427,7 +459,7 @@ button.secondary-btn:hover { background: #444; }
     <div>
       <div style="max-height:500px; overflow-y:auto;">
         <table class="master-table">
-          <thead><tr><th>Menu Item ID & Name</th><th>Current Units</th><th>Status Metric</th><th>Supplier / Parameter</th></tr></thead>
+          <thead><tr><th><span id="inv-col-header">Product ID</span> & Name</th><th>Beginning Qty</th><th>Changes (+/-)</th><th>Ending Inventory</th><th>Status Metric</th></tr></thead>
           <tbody id="inventory-table-body"></tbody>
         </table>
       </div>
@@ -438,124 +470,146 @@ button.secondary-btn:hover { background: #444; }
       <select id="inventory-target-select"></select>
       <label>Adjustment Mode Type: </label>
       <select id="inventory-action-type">
+        <option value="beginning">Set Beginning Quantity</option>
         <option value="add">Append Added Stock Count (Restock)</option>
-        <option value="subtract">Manual Deduction (Discrepancy/Spoilage)</option>
+        <option value="subtract">Manual Deduction (Discrepancy/Used)</option>
       </select>
-      <label>Change Count Value Quantity (Units): </label>
+      <label>Quantity (Units): </label>
       <input type="number" id="inventory-qty-input" value="1">
-      <label>Individual Cost Per Serving (PHP):</label>
-      <input type="number" id="inventory-cost-input" value="0.00">
-      <label>Supplier Vendor Details:</label>
-      <input type="text" id="inventory-notes-input" placeholder="e.g., Local Vendor Marketplace">
       <button class="action-btn" onclick="executeSmartStockControllerUpdate()">Process Parameter Update</button>
     </div>
   </div>
 </div>
 
-<!-- Costing / Recipe View -->
-<div id="recipe-section" class="app-section">
-  <h3>Recipe Component Costing & Profit Margin Projection Module</h3>
-  <div class="grid-2col">
-    <div>
-      <h3>Add Recipe Component Ingredient Track Line</h3>
-      <label>Target Menu Plate Dish:</label>
-      <select id="recipe-dish-target"></select>
-      <label>Ingredient Structural Description: </label>
-      <input type="text" id="recipe-ing-name" placeholder="e.g., Sliced Frozen Beef strips">
-      <label>Wholesale Purchase Package Cost (PHP): </label>
-      <input type="number" id="recipe-bulk-cost" placeholder="0.00">
-      <label>Yield Output Portions Per Package (Servings): </label>
-      <input type="number" id="recipe-bulk-yield" placeholder="1">
-      <button class="action-btn" onclick="appendCostingIngredientRow()">Add Ingredient to Recipe Log</button>
-      
-      <div class="costing-summary-box">
-        <h4>Calculated Pricing Target Projections</h4>
-        <p>Aggregated Ingredient Base Cost: <span id="calc-base-cost" style="font-weight:bold; color:var(--red);">PHP 0.00</span></p>
-        <label style="font-size:12px;">Target Gross Margin Goal Ratio Percentage (%):</label>
-        <input type="number" id="recipe-target-margin" value="60" oninput="recomputeRecipeAnalyticsGains()">
-        <p>Proposed Suggested Retail Value Level: <span id="calc-suggested-price" style="font-weight:bold; color: #28a745;">PHP 0.00</span></p>
-      </div>
-    </div>
-    
-    <div>
-      <h3>Active Recipe Structural Line Breakdown</h3>
-      <div style="max-height:400px; overflow-y:auto;">
-        <table class="master-table">
-          <thead><tr><th>Target Menu Item</th><th>Ingredient</th><th>Serving Unit Cost</th></tr></thead>
-          <tbody id="recipe-ingredients-body">
-            <tr><td colspan="3" style="text-align:center; color:#999;">No recipe calculations saved.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- Hidden Print Elements -->
 <div id="receipt-print-area" aria-hidden="true"></div>
 <div id="report-print-area" aria-hidden="true"></div>
 
 <script>
-/* ---------- Database Configuration ---------- */
+/* Database Configuration */
 var silogItems = [
   { name: "ADOBO SILOG", price: 149 },
   { name: "BAGNET SILOG", price: 159 },
   { name: "BANGUS SILOG", price: 159 },
-  { name: "BANGUS TAPA SILOG", price: 129 },
-  { name: "BANGUS TOCINO SILOG", price: 129 },
+  { name: "BANGUS TAPA SILOG", price: 129},
+  { name: "BANGUS TOCINO SILOG", price: 129},
   { name: "BURGER STEAK SILOG", price: 159 },
-  { name: "CHICKEN PASTIL SILOG", price: 99 },
-  { name: "CORN BEEF SILOG", price: 129 },
+  { name: "CHICKEN PASTIL SILOG", price: 99},
+  { name: "CORN BEEF SILOG", price: 129},
   { name: "HAMSILOG", price: 99 },
-  { name: "HOTDOG SILOG", price: 99 },
+  { name: "HOTDOG SILOG", price: 99},
   { name: "DINAKDAKAN SILOG", price: 159 },
   { name: "HUNGARIAN SILOG", price: 159 },
   { name: "LIEMPO SILOG", price: 159 },
-  { name: "LONGGANISA SILOG", price: 149 },
+  { name: "LONGGANISA SILOG", price: 149},
   { name: "NUGGET SILOG", price: 99 },
   { name: "SISIG SILOG", price: 159 },
   { name: "SKINLESS SILOG", price: 99 },
-  { name: "SPAM SILOG", price: 149 },
+  { name: "SPAM SILOG", price: 149},
   { name: "TAPA SILOG", price: 149 },
   { name: "TOCINO SILOG", price: 149 }
 ];
 
-var extrasItems = [
-  { name: "PLAIN RICE", price: 20 },
-  { name: "FRIED RICE", price: 25 },
-  { name: "FRIES BBQ", price: 50 },
-  { name: "FRIES CHEESE", price: 50 },
-  { name: "FRIES SOUR CREAM", price: 50 },
-  { name: "TAKE-OUT (STYRO)", price: 5 },
-  { name: "TAKE-OUT (BOX)", price: 10 }
+var bbqItems = [
+  { name: "PORK BBQ", price: 35 },
+  { name: "CHICKEN INASAL", price: 120 }
 ];
 
-var drinksItems = [
-  { name: "COKE", price: 30 },
-  { name: "MOUNTAIN DEW", price: 30 },
-  { name: "SODA GREEN APPLE", price: 49 },
-  { name: "SODA BLUEBERRY", price: 49 },
-  { name: "SODA LEMON", price: 49 },
-  { name: "SODA MANGO", price: 49 },
-  { name: "SODA WATERMELON", price: 49 },
-  { name: "SODA - STRAWBERRY", price: 49 },
-  { name: "SODA LYCHEE", price: 49 },
-  { name: "PALAMIG BLACK GULAMAN", price: 25 },
-  { name: "PALAMIG BLUE LEMONADE", price: 25 },
-  { name: "PALAMIG CUCUMBER LEMONADE", price: 25 },
-  { name: "MINERAL WATER", price: 25 }
+var othersItems = [
+  { name: "PARES", price: 99 }
 ];
 
-/* ---------- Local State Management ---------- */
+/* Raw Ingredients Database */
+var rawIngredientsList = [
+  // MAIN INGREDIENTS
+  { name: "Rice (kg)", category: "Main Ingredients" },
+  { name: "Eggs (pcs)", category: "Main Ingredients" },
+  { name: "Egg", category: "Main Ingredients" },
+  { name: "Ham (packs)", category: "Main Ingredients" },
+  { name: "Hotdog (packs)", category: "Main Ingredients" },
+  { name: "Skinless (packs)", category: "Main Ingredients" },
+  { name: "Hungarian (packs)", category: "Main Ingredients" },
+  { name: "Spam (cans)", category: "Main Ingredients" },
+  { name: "Longganisa (packs)", category: "Main Ingredients" },
+  { name: "Beef Tapa (packs)", category: "Main Ingredients" },
+  { name: "Tocino (packs)", category: "Main Ingredients" },
+  { name: "Bangus (packs)", category: "Main Ingredients" },
+  { name: "Bangus Tocino (packs)", category: "Main Ingredients" },
+  { name: "Bangus Tapa (packs)", category: "Main Ingredients" },
+  { name: "Corned Beef (cans)", category: "Main Ingredients" },
+  { name: "Burger Steak Patty (packs)", category: "Main Ingredients" },
+  { name: "Sisig (packs)", category: "Main Ingredients" },
+  { name: "Dinakdakan (packs)", category: "Main Ingredients" },
+  { name: "Liempo (packs)", category: "Main Ingredients" },
+  { name: "Bagnet (packs)", category: "Main Ingredients" },
+  { name: "Chicken Pastil (packs)", category: "Main Ingredients" },
+  { name: "Adobo (packs)", category: "Main Ingredients" },
+  { name: "Nuggets (packs)", category: "Main Ingredients" },
+  // VEGETABLES & SEASONINGS
+  { name: "Tomatoes (pcs)", category: "Veg & Seasonings" },
+  { name: "Cucumber (pcs)", category: "Veg & Seasonings" },
+  { name: "Onions (pcs)", category: "Veg & Seasonings" },
+  { name: "Garlic (pcs)", category: "Veg & Seasonings" },
+  { name: "Calamansi (kg)", category: "Veg & Seasonings" },
+  { name: "Red Chili (kg)", category: "Veg & Seasonings" },
+  { name: "Green Chili (kg)", category: "Veg & Seasonings" },
+  { name: "Cooking Oil (L)", category: "Veg & Seasonings" },
+  { name: "Soy Sauce (bottles)", category: "Veg & Seasonings" },
+  { name: "Vinegar (bottles)", category: "Veg & Seasonings" },
+  { name: "Ketchup (bottles)", category: "Veg & Seasonings" },
+  { name: "Mayonnaise (bottles)", category: "Veg & Seasonings" },
+  { name: "Burger Steak Gravy (packs)", category: "Veg & Seasonings" },
+  // FRIES & SNACKS
+  { name: "Fries (packs)", category: "Fries & Snacks" },
+  { name: "Cheese Powder", category: "Fries & Snacks" },
+  { name: "BBQ Powder", category: "Fries & Snacks" },
+  { name: "Sour Cream Powder", category: "Fries & Snacks" },
+  // DRINKS (Ingredients & Syrups)
+  { name: "Coke", category: "Drinks Ingredients" },
+  { name: "Coke Zero", category: "Drinks Ingredients" },
+  { name: "Sprite", category: "Drinks Ingredients" },
+  { name: "Water", category: "Drinks Ingredients" },
+  { name: "Mineral Water", category: "Drinks Ingredients" },
+  { name: "Mountain Dew", category: "Drinks Ingredients" },
+  { name: "Green Apple Syrup", category: "Drinks Ingredients" },
+  { name: "Blueberry Syrup", category: "Drinks Ingredients" },
+  { name: "Mango Syrup", category: "Drinks Ingredients" },
+  { name: "Strawberry Syrup", category: "Drinks Ingredients" },
+  { name: "Watermelon Syrup", category: "Drinks Ingredients" },
+  { name: "Lychee Syrup", category: "Drinks Ingredients" },
+  { name: "Lemon Syrup", category: "Drinks Ingredients" },
+  { name: "Gulaman", category: "Drinks Ingredients" },
+  { name: "Blue Lemonade", category: "Drinks Ingredients" },
+  { name: "Cucumber Lemonade", category: "Drinks Ingredients" },
+  { name: "Ice (bags)", category: "Drinks Ingredients" },
+  // PACKAGING
+  { name: "Styro Box", category: "Packaging" },
+  { name: "Craft Box", category: "Packaging" },
+  { name: "16 oz Cups", category: "Packaging" },
+  { name: "Cup Lids", category: "Packaging" },
+  { name: "Straws", category: "Packaging" },
+  { name: "Plastic Bags", category: "Packaging" },
+  { name: "Spoons & Forks", category: "Packaging" },
+  { name: "Napkins", category: "Packaging" }
+];
+
+/* Local State Management */
 var systemMenuCatalog = [];
+var systemIngredientsCatalog = [];
 var itemIndexCounter = 1;
-var inventoryDatabaseStore = {};
+var ingredientIndexCounter = 1;
+
+var productsDatabaseStore = {}; // Maps to POS Menu Items
+var ingredientsDatabaseStore = {}; // Maps to Raw List
+var activeInventoryTab = 'products'; // 'products' or 'ingredients'
+var currentInvFilter = 'all';
+
 var activeBasketArray = [];
 var kitchenPendingQueue = [];
 var itemizedDeductionsLedger = [];
 var dailyReport = { totalSales: 0.00, cashSales: 0.00, onlineSales: 0.00, orderCount: 0, itemsSold: {} };
-var recipeIngredientsMatrix = [];
 
-/* ---------- Lifecycle Initialization ---------- */
+/* Lifecycle Initialization */
 window.onload = function() {
   populateSystemMasterCatalogArrays();
   initializeInventoryStorageToZero();
@@ -563,79 +617,53 @@ window.onload = function() {
   refreshAllUI();
 };
 
-/* ---------- Setup Functions ---------- */
+/* Setup Functions */
 function populateSystemMasterCatalogArrays() {
   systemMenuCatalog = [];
   itemIndexCounter = 1;
   
-  silogItems.forEach(function(i) {
-    systemMenuCatalog.push({
-      id: "SLG" + itemIndexCounter++,
-      name: i.name,
-      category: "Silog Menu",
-      defaultPrice: i.price
-    });
-  });
-  
-  extrasItems.forEach(function(i) {
-    systemMenuCatalog.push({
-      id: "EXT" + itemIndexCounter++,
-      name: i.name,
-      category: "Extras",
-      defaultPrice: i.price
-    });
-  });
-  
-  drinksItems.forEach(function(i) {
-    systemMenuCatalog.push({
-      id: "DRKS" + itemIndexCounter++,
-      name: i.name,
-      category: "Drinks",
-      defaultPrice: i.price
-    });
-  });
-  
-  systemMenuCatalog.push({
-    id: "ING_EGG",
-    name: "EGG",
-    category: "Ingredients",
-    defaultPrice: 0
+  silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
+  bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
+  othersItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Others", defaultPrice: i.price }); });
+
+  systemIngredientsCatalog = [];
+  ingredientIndexCounter = 1;
+  rawIngredientsList.forEach(function(i) {
+    systemIngredientsCatalog.push({ id: "ING" + ingredientIndexCounter++, name: i.name, category: i.category });
   });
 }
 
 function initializeInventoryStorageToZero() {
-  inventoryDatabaseStore = {};
+  productsDatabaseStore = {};
   systemMenuCatalog.forEach(function(item) {
-    inventoryDatabaseStore[item.id] = {
-      name: item.name,
-      stockLevel: 0,
-      unitCost: 0.00,
-      supplierNotes: "Default Entry Base"
-    };
+    productsDatabaseStore[item.id] = { name: item.name, category: item.category, beginningQty: 0, changesQty: 0, endingQty: 0 };
+  });
+
+  ingredientsDatabaseStore = {};
+  systemIngredientsCatalog.forEach(function(item) {
+    ingredientsDatabaseStore[item.id] = { name: item.name, category: item.category, beginningQty: 0, changesQty: 0, endingQty: 0 };
   });
 }
 
-/* ---------- State Persistence ---------- */
+/* State Persistence - Bumped to v4 to clear cache based on structural changes */
 function saveState() {
   var startCashEl = document.getElementById("starting-cash-input");
   var discSelEl = document.getElementById("pos-discount-select");
   var payMethEl = document.getElementById("pos-payment-method");
-  var targMargEl = document.getElementById("recipe-target-margin");
-
+  
   var state = {
-    inventoryDatabaseStore: inventoryDatabaseStore,
+    productsDatabaseStore: productsDatabaseStore,
+    ingredientsDatabaseStore: ingredientsDatabaseStore,
     activeBasketArray: activeBasketArray,
     kitchenPendingQueue: kitchenPendingQueue,
     itemizedDeductionsLedger: itemizedDeductionsLedger,
     dailyReport: dailyReport,
-    recipeIngredientsMatrix: recipeIngredientsMatrix,
     startingCash: startCashEl ? startCashEl.value : "1000",
     discountSelect: discSelEl ? discSelEl.value : "0",
-    paymentMethod: payMethEl ? payMethEl.value : "cash",
-    targetMargin: targMargEl ? targMargEl.value : "60"
+    paymentMethod: payMethEl ? payMethEl.value : "cash"
   };
   try {
-    localStorage.setItem("siloganNiJoy_State", JSON.stringify(state));
+    localStorage.setItem("siloganNiJoy_State_v4", JSON.stringify(state));
   } catch (e) {
     console.error("Local Storage write blocked", e);
   }
@@ -643,10 +671,19 @@ function saveState() {
 
 function loadState() {
   try {
-    var saved = localStorage.getItem("siloganNiJoy_State");
+    var saved = localStorage.getItem("siloganNiJoy_State_v4");
     if (saved) {
       var state = JSON.parse(saved);
-      if (state.inventoryDatabaseStore) inventoryDatabaseStore = state.inventoryDatabaseStore;
+      if (state.productsDatabaseStore) {
+        productsDatabaseStore = state.productsDatabaseStore;
+      }
+      if (state.ingredientsDatabaseStore) {
+        Object.keys(state.ingredientsDatabaseStore).forEach(function(k) {
+          if (ingredientsDatabaseStore[k]) {
+            ingredientsDatabaseStore[k] = state.ingredientsDatabaseStore[k];
+          }
+        });
+      }
       if (state.activeBasketArray) activeBasketArray = state.activeBasketArray;
       if (state.kitchenPendingQueue) kitchenPendingQueue = state.kitchenPendingQueue;
       if (state.itemizedDeductionsLedger) itemizedDeductionsLedger = state.itemizedDeductionsLedger;
@@ -654,8 +691,6 @@ function loadState() {
         dailyReport = state.dailyReport;
         if (!dailyReport.itemsSold) dailyReport.itemsSold = {};
       }
-      if (state.recipeIngredientsMatrix) recipeIngredientsMatrix = state.recipeIngredientsMatrix;
-      
       if (state.startingCash && document.getElementById("starting-cash-input")) {
         document.getElementById("starting-cash-input").value = state.startingCash;
       }
@@ -665,16 +700,13 @@ function loadState() {
       if (state.paymentMethod && document.getElementById("pos-payment-method")) {
         document.getElementById("pos-payment-method").value = state.paymentMethod;
       }
-      if (state.targetMargin && document.getElementById("recipe-target-margin")) {
-        document.getElementById("recipe-target-margin").value = state.targetMargin;
-      }
     }
   } catch (e) {
     console.error("Local Storage read blocked", e);
   }
 }
 
-/* ---------- Navigation Logic ---------- */
+/* Navigation Logic */
 function switchAppTab(targetSectionId) {
   document.querySelectorAll(".app-section").forEach(function(viewPanel) {
     viewPanel.classList.remove("active-section");
@@ -682,65 +714,65 @@ function switchAppTab(targetSectionId) {
   document.querySelectorAll(".tab-button").forEach(function(tabButton) {
     tabButton.classList.remove("active-tab");
   });
-
   document.getElementById(targetSectionId).classList.add("active-section");
   var tabs = document.querySelectorAll(".navigation-tabs button");
+  
   if (targetSectionId === "pos-section") tabs[0].classList.add("active-tab");
   if (targetSectionId === "orders-section") tabs[1].classList.add("active-tab");
   if (targetSectionId === "financials-section") {
     tabs[2].classList.add("active-tab");
     updateFinancialUI();
   }
-  if (targetSectionId === "inventory-section") tabs[3].classList.add("active-tab");
-  if (targetSectionId === "recipe-section") tabs[4].classList.add("active-tab");
+  if (targetSectionId === "inventory-section") {
+    tabs[3].classList.add("active-tab");
+    refreshInventoryTableUI(currentInvFilter);
+  }
 }
 
 function repopulateMasterDropdownSelections() {
   var inventorySelect = document.getElementById("inventory-target-select");
-  var recipeSelect = document.getElementById("recipe-dish-target");
   inventorySelect.innerHTML = "";
-  recipeSelect.innerHTML = "";
   
-  systemMenuCatalog.forEach(function(element) {
-    inventorySelect.add(new Option(element.name, element.id));
-    if (element.category !== "Ingredients") {
-      recipeSelect.add(new Option(element.name, element.id));
+  var targetCatalog = (activeInventoryTab === 'products') ? systemMenuCatalog : systemIngredientsCatalog;
+  var categories = {};
+  
+  targetCatalog.forEach(function(item) {
+    if (!categories[item.category]) {
+      categories[item.category] = document.createElement("optgroup");
+      categories[item.category].label = item.category.toUpperCase();
+      inventorySelect.appendChild(categories[item.category]);
     }
+    categories[item.category].appendChild(new Option(item.name, item.id));
   });
 }
 
 function refreshAllUI() {
   renderInteractivePOSMenuUI();
   repopulateMasterDropdownSelections();
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   updateFinancialUI();
   renderKitchenQueueUI();
-  renderRecipeIngredientsUI();
-  recomputeRecipeAnalyticsGains();
 }
 
-/* ---------- Interactive POS Menu ---------- */
+/* Interactive POS Menu */
 function renderInteractivePOSMenuUI() {
   var displayContainer = document.getElementById("pos-menu-grid");
   displayContainer.innerHTML = "";
-  
   var categories = [];
   systemMenuCatalog.forEach(function(item) {
-    if (item.category !== "Ingredients" && categories.indexOf(item.category) === -1) {
+    if (categories.indexOf(item.category) === -1) {
       categories.push(item.category);
     }
   });
-
   categories.forEach(function(categoryName) {
     var header = document.createElement("div");
     header.className = "menu-category-title";
     header.innerText = categoryName;
     displayContainer.appendChild(header);
-
+    
     var itemsInCategory = systemMenuCatalog.filter(function(i) {
       return i.category === categoryName;
     });
-
     itemsInCategory.forEach(function(menuItem) {
       var card = document.createElement("div");
       card.className = "item-card";
@@ -751,23 +783,16 @@ function renderInteractivePOSMenuUI() {
   });
 }
 
-/* ---------- Basket Logic ---------- */
+/* Basket Logic */
 function addItemToOrderBasket(menuItemId) {
   var catalogMatch = systemMenuCatalog.find(function(i) { return i.id === menuItemId; });
   if (!catalogMatch) return;
   
-  var verifiedInv = inventoryDatabaseStore[menuItemId];
-  if (verifiedInv && verifiedInv.stockLevel <= 0) {
-    if (!confirm("STOCK WARNING: \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
+  var verifiedInv = productsDatabaseStore[menuItemId];
+  if (verifiedInv && verifiedInv.endingQty <= 0) {
+    if (!confirm("STOCK WARNING: Product \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
   }
-  
-  if (catalogMatch.category === "Silog Menu") {
-    var eggStock = inventoryDatabaseStore["ING_EGG"];
-    if (eggStock && eggStock.stockLevel <= 0) {
-      if (!confirm("STOCK WARNING: Component [EGG] is at 0 units. Override and add " + catalogMatch.name + " anyway?")) return;
-    }
-  }
-  
+
   var existingMatch = activeBasketArray.find(function(entry) { return entry.id === menuItemId; });
   if (existingMatch) {
     existingMatch.qty++;
@@ -810,7 +835,6 @@ function clearActiveBasket() {
 function recalculateBasketTotals() {
   var basketContainer = document.getElementById("basket-entries");
   basketContainer.innerHTML = "";
-  
   if (activeBasketArray.length === 0) {
     basketContainer.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Order basket is completely empty.</td></tr>';
     document.getElementById("summary-subtotal").innerText = "PHP 0.00";
@@ -819,30 +843,28 @@ function recalculateBasketTotals() {
     calculateChangeReturnAmount();
     return;
   }
-
+  
   var subtotal = 0;
   var highestItemPrice = 0;
-  
   activeBasketArray.forEach(function(basketRow) {
     var totalRowPrice = basketRow.qty * basketRow.price;
     subtotal += totalRowPrice;
     if (basketRow.price > highestItemPrice) {
       highestItemPrice = basketRow.price;
     }
-    
     var tr = document.createElement("tr");
     tr.innerHTML = "<td><strong>" + basketRow.name + "</strong></td>" +
-                   "<td>" + basketRow.qty + "</td>" +
-                   "<td>PHP " + totalRowPrice.toFixed(2) + "</td>" +
-                   "<td><button style='background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;' " +
-                   "onclick=\"removeBasketItemUnit('" + basketRow.id + "')\">X</button></td>";
+      "<td>" + basketRow.qty + "</td>" +
+      "<td>PHP " + totalRowPrice.toFixed(2) + "</td>" +
+      "<td><button style='background:var(--red); color:white; border:none; padding:2px 6px; border-radius:3px; cursor:pointer;' " +
+      "onclick=\"removeBasketItemUnit('" + basketRow.id + "')\">X</button></td>";
     basketContainer.appendChild(tr);
   });
-
+  
   var discRate = parseFloat(document.getElementById("pos-discount-select").value) || 0;
   var discVal = (discRate > 0) ? (highestItemPrice * (discRate / 100)) : 0;
   var grandTotal = Math.max(0, subtotal - discVal);
-
+  
   document.getElementById("summary-subtotal").innerText = "PHP " + subtotal.toFixed(2);
   document.getElementById("summary-discount").innerText = "PHP " + discVal.toFixed(2);
   document.getElementById("summary-grand-total").innerText = "PHP " + grandTotal.toFixed(2);
@@ -856,58 +878,59 @@ function calculateChangeReturnAmount() {
   document.getElementById("pos-change-due").innerText = "PHP " + Math.max(0, cashTendered - amountDue).toFixed(2);
 }
 
-/* ---------- POS Checkout ---------- */
+/* POS Checkout */
 function executePOSCheckoutOrder() {
   if (activeBasketArray.length === 0) {
     alert("Basket is empty.");
     return;
   }
-
+  
   var totalPayableText = document.getElementById("summary-grand-total").innerText.replace("PHP", "").replace(/,/g, "");
   var totalPayable = parseFloat(totalPayableText) || 0;
   var payMethod = document.getElementById("pos-payment-method").value;
   var cashAmount = parseFloat(document.getElementById("pos-cash-tendered").value) || 0;
-
+  
   if (payMethod === "cash" && cashAmount < totalPayable) {
     alert("Insufficient cash payment amount tendered.");
     return;
   }
-
+  
   var ticketId = "SNJ-" + Math.floor(1000 + Math.random() * 9000);
-
-  // 1. Build Receipt Template for RawBT (Compatible, pure string)
+  
   var receiptText = "";
-  receiptText += "         SILOGAN NI JOY\n";
-  receiptText += "     POS Operational Ticket\n";
-  receiptText += "--------------------------------\n";
+  receiptText += "SILOGAN NI JOY\n";
+  receiptText += "POS Operational Ticket\n";
+  receiptText += "------\n";
   receiptText += "Ticket No: " + ticketId + "\n";
   receiptText += "Date: " + new Date().toLocaleString() + "\n";
-  receiptText += "--------------------------------\n";
+  receiptText += "------\n";
+  
   activeBasketArray.forEach(function(item) {
     receiptText += item.qty + "x " + item.name + "\n";
-    receiptText += "    PHP " + (item.qty * item.price).toFixed(2) + "\n";
+    receiptText += " PHP " + (item.qty * item.price).toFixed(2) + "\n";
   });
-  receiptText += "--------------------------------\n";
-  receiptText += "TOTAL DUE:     PHP " + totalPayable.toFixed(2) + "\n";
-  receiptText += "PAYMENT:       " + payMethod.toUpperCase() + "\n";
+  
+  receiptText += "----\n";
+  receiptText += "TOTAL DUE: PHP " + totalPayable.toFixed(2) + "\n";
+  receiptText += "PAYMENT: " + payMethod.toUpperCase() + "\n";
   if (payMethod === "cash") {
     receiptText += "CASH TENDERED: PHP " + cashAmount.toFixed(2) + "\n";
-    receiptText += "CHANGE:        PHP " + Math.max(0, cashAmount - totalPayable).toFixed(2) + "\n";
+    receiptText += "CHANGE: PHP " + Math.max(0, cashAmount - totalPayable).toFixed(2) + "\n";
   }
-  receiptText += "--------------------------------\n";
-  receiptText += "  Thank you for dining with us!\n\n\n\n";
+  receiptText += "------\n";
+  receiptText += "Thank you for dining with us!\n\n\n\n";
 
-  // 2. Logic for Stock Deduction & Report
+  var receiptPrintEl = document.getElementById("receipt-print-area");
+  receiptPrintEl.innerHTML = "<pre>" + receiptText + "</pre>";
+
+  // Deductions from Products Inventory and Daily Reports
   activeBasketArray.forEach(function(row) {
-    if (inventoryDatabaseStore[row.id]) {
-      inventoryDatabaseStore[row.id].stockLevel = Math.max(0, inventoryDatabaseStore[row.id].stockLevel - row.qty);
-    }
-    if (row.category === "Silog Menu" && inventoryDatabaseStore["ING_EGG"]) {
-      inventoryDatabaseStore["ING_EGG"].stockLevel = Math.max(0, inventoryDatabaseStore["ING_EGG"].stockLevel - row.qty);
+    if (productsDatabaseStore[row.id]) {
+      productsDatabaseStore[row.id].endingQty = Math.max(0, productsDatabaseStore[row.id].endingQty - row.qty);
     }
     dailyReport.itemsSold[row.name] = (dailyReport.itemsSold[row.name] || 0) + row.qty;
   });
-
+  
   dailyReport.totalSales += totalPayable;
   if (payMethod === "cash") {
     dailyReport.cashSales += totalPayable;
@@ -916,25 +939,22 @@ function executePOSCheckoutOrder() {
   }
   dailyReport.orderCount++;
 
-  // Queue to Kitchen
   kitchenPendingQueue.push({
     ticketId: ticketId,
     timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     items: JSON.parse(JSON.stringify(activeBasketArray))
   });
 
-  // Clear POS Active UI Frame
   activeBasketArray = [];
   document.getElementById("pos-discount-select").value = "0";
   document.getElementById("pos-cash-tendered").value = "";
-
   recalculateBasketTotals();
+  
   renderKitchenQueueUI();
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   updateFinancialUI();
   saveState();
 
-  // Send Direct Link trigger to RawBT Print app
   try {
     window.location.href = "rawbt:" + encodeURIComponent(receiptText);
   } catch (err) {
@@ -942,11 +962,10 @@ function executePOSCheckoutOrder() {
   }
 }
 
-/* ---------- Kitchen Queue ---------- */
+/* Kitchen Queue */
 function renderKitchenQueueUI() {
   var container = document.getElementById("kitchen-queue-display");
   container.innerHTML = "";
-  
   kitchenPendingQueue.forEach(function(ticket) {
     var card = document.createElement("div");
     card.className = "order-card";
@@ -955,10 +974,9 @@ function renderKitchenQueueUI() {
       itemsHtml += "<div>" + it.qty + " x " + it.name + "</div>";
     });
     card.innerHTML = "<h4>Ticket " + ticket.ticketId + " <small style='float:right'>" + ticket.timestamp + "</small></h4>" +
-                     "<div>" + itemsHtml + "</div>" +
-                     "<button class='action-btn' style='margin-top: 15px; background: #28a745; padding: 8px;' " +
-                     "onclick=\"markOrderAsServed('" + ticket.ticketId + "')\">" +
-                     "Mark as Served</button>";
+      "<div>" + itemsHtml + "</div>" +
+      "<button class='action-btn' style='margin-top: 15px; background: #28a745; padding: 8px;' " +
+      "onclick=\"markOrderAsServed('" + ticket.ticketId + "')\">Mark as Served</button>";
     container.appendChild(card);
   });
   document.getElementById("queue-count-badge").innerText = kitchenPendingQueue.length;
@@ -973,21 +991,21 @@ function markOrderAsServed(ticketId) {
   }
 }
 
-/* ---------- Financial Analysis ---------- */
+/* Financial Analysis & Summaries */
 function updateFinancialUI() {
   document.getElementById("ui-total-sales").innerText = "PHP " + dailyReport.totalSales.toFixed(2);
   document.getElementById("ui-cash-sales").innerText = "PHP " + dailyReport.cashSales.toFixed(2);
   document.getElementById("ui-online-sales").innerText = "PHP " + dailyReport.onlineSales.toFixed(2);
-
+  
   var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
   document.getElementById("ui-total-deductions").innerText = "PHP " + totalDeductions.toFixed(2);
-
+  
   var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
   var netCash = startingCash + dailyReport.cashSales - totalDeductions;
   document.getElementById("financial-net-cash").innerText = "PHP " + netCash.toFixed(2);
-
+  
   document.getElementById("ui-order-count").innerText = dailyReport.orderCount;
-
+  
   refreshSummarizedOrdersUI();
   refreshDeductionsUI();
   saveState();
@@ -997,7 +1015,7 @@ function applyManualFinancialAdjustment() {
   var target = document.getElementById("adj-metric-target").value;
   var val = parseFloat(document.getElementById("adj-metric-value").value) || 0;
   if (!val) return;
-
+  
   switch (target) {
     case "totalSales_add": dailyReport.totalSales += val; break;
     case "totalSales_sub": dailyReport.totalSales = Math.max(0, dailyReport.totalSales - val); break;
@@ -1018,19 +1036,15 @@ function addNewDeductionEntry() {
   var desc = document.getElementById("expense-desc-input").value || "Miscellaneous";
   var payee = document.getElementById("expense-payee-input").value || "N/A";
   var amt = parseFloat(document.getElementById("expense-amount-input").value) || 0;
-
+  
   if (amt <= 0) return alert("Enter valid amount");
-
-  itemizedDeductionsLedger.push({
-    category: type,
-    description: desc + " (" + payee + ")",
-    amount: amt
-  });
-
+  
+  itemizedDeductionsLedger.push({ category: type, description: desc + " (" + payee + ")", amount: amt });
+  
   document.getElementById("expense-desc-input").value = "";
   document.getElementById("expense-payee-input").value = "";
   document.getElementById("expense-amount-input").value = "";
-
+  
   updateFinancialUI();
   saveState();
 }
@@ -1038,17 +1052,18 @@ function addNewDeductionEntry() {
 function refreshSummarizedOrdersUI() {
   var tbody = document.getElementById("summarized-orders-display-body");
   tbody.innerHTML = "";
-  
   var items = dailyReport.itemsSold;
   var keys = Object.keys(items);
+  
   if (keys.length === 0) {
     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No items sold yet.</td></tr>';
     return;
   }
+  
   keys.forEach(function(name) {
     var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + name + "</td><td>" + items[name] + "</td>" + 
-                   "<td><button class='action-btn' style='margin:0; padding:4px 8px; width:auto; background:var(--red);' onclick=\"removeSummarizedItemQuantity('" + name + "')\">-</button></td>";
+    tr.innerHTML = "<td>" + name + "</td><td>" + items[name] + "</td>" +
+      "<td><button class='action-btn' style='margin:0; padding:4px 8px; width:auto; background:var(--red);' onclick=\"removeSummarizedItemQuantity('" + name + "')\">-</button></td>";
     tbody.appendChild(tr);
   });
 }
@@ -1068,11 +1083,11 @@ function removeSummarizedItemQuantity(itemName) {
 function refreshDeductionsUI() {
   var tbody = document.getElementById("deductions-table-body");
   tbody.innerHTML = "";
-  
   if (itemizedDeductionsLedger.length === 0) {
     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No operational ledger changes recorded.</td></tr>';
     return;
   }
+  
   itemizedDeductionsLedger.forEach(function(row) {
     var tr = document.createElement("tr");
     tr.innerHTML = "<td>" + row.category + "</td><td>" + row.description + "</td><td>PHP " + row.amount.toFixed(2) + "</td>";
@@ -1080,198 +1095,113 @@ function refreshDeductionsUI() {
   });
 }
 
-/* ---------- Master Stock Control ---------- */
-function refreshInventoryTableUI(filter) {
-  if (!filter) filter = "all";
-  var tbody = document.getElementById("inventory-table-body");
-  tbody.innerHTML = "";
+/* Master Stock Control */
+function switchInventorySubTab(tabMode) {
+  activeInventoryTab = tabMode;
   
-  var ids = Object.keys(inventoryDatabaseStore);
-  if (ids.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">No inventory rows.</td></tr>';
-    return;
+  // Update Buttons UI mapping
+  document.getElementById("sub-tab-products").classList.remove("active-sub-tab");
+  document.getElementById("sub-tab-ingredients").classList.remove("active-sub-tab");
+  
+  if (tabMode === 'products') {
+    document.getElementById("sub-tab-products").classList.add("active-sub-tab");
+    document.getElementById("inv-col-header").innerText = "Product ID";
+  } else {
+    document.getElementById("sub-tab-ingredients").classList.add("active-sub-tab");
+    document.getElementById("inv-col-header").innerText = "Ingredient ID";
   }
   
-  ids.forEach(function(id) {
-    var row = inventoryDatabaseStore[id];
-    if (filter === "low" && row.stockLevel >= 10) return;
-    if (filter === "out" && row.stockLevel > 0) return;
-
-    var status = row.stockLevel === 0 ? '<span class="badge bg-danger">OUT</span>' :
-                 (row.stockLevel < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
-                 
-    var tr = document.createElement("tr");
-    tr.innerHTML = "<td>" + id + " / " + row.name + "</td>" +
-                   "<td>" + row.stockLevel + "</td>" +
-                   "<td>" + status + "</td>" +
-                   "<td>" + row.supplierNotes + "</td>";
-    tbody.appendChild(tr);
-  });
+  repopulateMasterDropdownSelections();
+  refreshInventoryTableUI(currentInvFilter);
 }
 
 function filterInventoryDisplay(mode) {
+  currentInvFilter = mode;
   document.querySelectorAll(".filter-row button").forEach(function(b) {
     b.classList.remove("active-filter");
   });
   if (mode === "all") document.getElementById("filter-btn-all").classList.add("active-filter");
   if (mode === "low") document.getElementById("filter-btn-low").classList.add("active-filter");
   if (mode === "out") document.getElementById("filter-btn-out").classList.add("active-filter");
-  refreshInventoryTableUI(mode);
+  
+  refreshInventoryTableUI(currentInvFilter);
+}
+
+function refreshInventoryTableUI(filter) {
+  if (!filter) filter = "all";
+  currentInvFilter = filter;
+  var tbody = document.getElementById("inventory-table-body");
+  tbody.innerHTML = "";
+  
+  var targetDatabase = (activeInventoryTab === 'products') ? productsDatabaseStore : ingredientsDatabaseStore;
+  var ids = Object.keys(targetDatabase);
+  
+  if (ids.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No inventory rows.</td></tr>';
+    return;
+  }
+  
+  ids.forEach(function(id) {
+    var row = targetDatabase[id];
+    if (filter === "low" && row.endingQty >= 10) return;
+    if (filter === "out" && row.endingQty > 0) return;
+    
+    var status = row.endingQty <= 0 ? '<span class="badge bg-danger">OUT</span>' :
+      (row.endingQty < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
+    var tr = document.createElement("tr");
+    
+    var displayName = `[${row.category}] ${row.name}`;
+
+    tr.innerHTML = "<td><strong>" + id + "</strong><br>" + displayName + "</td>" +
+      "<td>" + row.beginningQty + "</td>" +
+      "<td>" + (row.changesQty >= 0 ? "+" + row.changesQty : row.changesQty) + "</td>" +
+      "<td>" + row.endingQty + "</td>" +
+      "<td>" + status + "</td>";
+    tbody.appendChild(tr);
+  });
 }
 
 function executeSmartStockControllerUpdate() {
   var target = document.getElementById("inventory-target-select").value;
   var mode = document.getElementById("inventory-action-type").value;
   var qty = parseInt(document.getElementById("inventory-qty-input").value) || 0;
-  var cost = parseFloat(document.getElementById("inventory-cost-input").value) || 0;
-  var notes = document.getElementById("inventory-notes-input").value || "";
-
+  
   if (!target) return alert("Select inventory row");
-
-  if (mode === "add") {
-    inventoryDatabaseStore[target].stockLevel += qty;
-  } else {
-    inventoryDatabaseStore[target].stockLevel = Math.max(0, inventoryDatabaseStore[target].stockLevel - qty);
+  
+  var targetDatabase = (activeInventoryTab === 'products') ? productsDatabaseStore : ingredientsDatabaseStore;
+  
+  if (mode === "beginning") {
+    targetDatabase[target].beginningQty = qty;
+    targetDatabase[target].endingQty = qty + targetDatabase[target].changesQty;
+  } else if (mode === "add") {
+    targetDatabase[target].changesQty += qty;
+    targetDatabase[target].endingQty += qty;
+  } else if (mode === "subtract") {
+    targetDatabase[target].changesQty -= qty;
+    targetDatabase[target].endingQty = Math.max(0, targetDatabase[target].endingQty - qty);
   }
-
-  inventoryDatabaseStore[target].unitCost = cost;
-  inventoryDatabaseStore[target].supplierNotes = notes || "Default Entry Base";
-
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   saveState();
 }
 
-/* ---------- Recipes Costing Matrix ---------- */
-function appendCostingIngredientRow() {
-  var dish = document.getElementById("recipe-dish-target").value;
-  var ing = document.getElementById("recipe-ing-name").value || "";
-  var bulkCost = parseFloat(document.getElementById("recipe-bulk-cost").value) || 0;
-  var yieldPortions = parseFloat(document.getElementById("recipe-bulk-yield").value) || 1;
-
-  if (!dish || !ing || bulkCost <= 0 || yieldPortions <= 0) {
-    return alert("Complete ingredient info");
-  }
-
-  var unitCost = bulkCost / yieldPortions;
-  recipeIngredientsMatrix.push({
-    dish: dish,
-    ingredient: ing,
-    unitCost: unitCost
-  });
-
-  document.getElementById("recipe-ing-name").value = "";
-  document.getElementById("recipe-bulk-cost").value = "";
-  document.getElementById("recipe-bulk-yield").value = "";
-
-  recomputeRecipeAnalyticsGains();
-  renderRecipeIngredientsUI();
-  saveState();
-}
-
-function recomputeRecipeAnalyticsGains() {
-  var baseCost = recipeIngredientsMatrix.reduce(function(s, r) { return s + (r.unitCost || 0); }, 0);
-  document.getElementById("calc-base-cost").innerText = "PHP " + baseCost.toFixed(2);
-
-  var marginPct = parseFloat(document.getElementById("recipe-target-margin").value) || 0;
-  var suggested = baseCost / Math.max(0.01, (1 - marginPct / 100));
-  document.getElementById("calc-suggested-price").innerText = "PHP " + suggested.toFixed(2);
-}
-
-function renderRecipeIngredientsUI() {
-  var tbody = document.getElementById("recipe-ingredients-body");
-  tbody.innerHTML = "";
-  
-  if (recipeIngredientsMatrix.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No recipe calculations saved.</td></tr>';
-    return;
-  }
-  recipeIngredientsMatrix.forEach(function(row) {
-    var tr = document.createElement("tr");
-    var catalogMatch = systemMenuCatalog.find(function(i) { return i.id === row.dish; });
-    var dishName = catalogMatch ? catalogMatch.name : row.dish;
-    tr.innerHTML = "<td>" + dishName + "</td><td>" + row.ingredient + "</td><td>PHP " + row.unitCost.toFixed(2) + "</td>";
-    tbody.appendChild(tr);
-  });
-}
-
-/* ---------- RawBT & PDF Reports ---------- */
-function printFinancialSummaryRawBT() {
-  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
-  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
-  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-
-  var summaryText = "";
-  summaryText += "         SILOGAN NI JOY\n";
-  summaryText += "     DAILY FINANCIAL SUMMARY\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "Date: " + new Date().toLocaleDateString() + "\n";
-  summaryText += "Time: " + new Date().toLocaleTimeString() + "\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "FINANCIAL METRICS:\n";
-  summaryText += "Gross Sales:    PHP " + dailyReport.totalSales.toFixed(2) + "\n";
-  summaryText += "Cash Sales:     PHP " + dailyReport.cashSales.toFixed(2) + "\n";
-  summaryText += "Online Sales:   PHP " + dailyReport.onlineSales.toFixed(2) + "\n";
-  summaryText += "Deductions:     PHP " + totalDeductions.toFixed(2) + "\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "NET CASH ON HAND:\n";
-  summaryText += "                PHP " + netCash.toFixed(2) + "\n";
-  summaryText += "--------------------------------\n";
-  summaryText += "ITEMS SOLD:\n";
-
-  var itemsKeys = Object.keys(dailyReport.itemsSold);
-  if (itemsKeys.length === 0) {
-    summaryText += "No items sold today.\n";
-  } else {
-    itemsKeys.forEach(function(key) {
-      summaryText += dailyReport.itemsSold[key] + "x " + key + "\n";
-    });
-  }
-  
-  summaryText += "--------------------------------\n";
-  summaryText += "DEDUCTIONS LEDGER:\n";
-  if (itemizedDeductionsLedger.length === 0) {
-    summaryText += "No deductions recorded.\n";
-  } else {
-    itemizedDeductionsLedger.forEach(function(d) {
-      summaryText += "[" + d.category + "]\n";
-      summaryText += (d.description || "Expenses") + "\n";
-      summaryText += "  PHP " + d.amount.toFixed(2) + "\n";
-    });
-  }
-  summaryText += "--------------------------------\n";
-  summaryText += "          End of Report\n\n\n\n";
-
-  try {
-    window.location.href = "rawbt:" + encodeURIComponent(summaryText);
-  } catch (err) {
-    console.error("Direct report print failed", err);
-    alert("Could not connect directly to RawBT app.");
-  }
-}
-
-function downloadFinancialSummaryPDF() {
-  triggerReportPDFGeneration();
-}
-
-function triggerReportPDFGeneration() {
-  var reportArea = document.getElementById("report-print-area");
+/* Reporting & Print Generators */
+function buildReportHTMLString() {
   var itemsRows = "";
   Object.keys(dailyReport.itemsSold).forEach(function(key) {
     itemsRows += "<tr><td>" + key + "</td><td>" + dailyReport.itemsSold[key] + "</td></tr>";
   });
-
+  
   var deductionsRows = "";
   itemizedDeductionsLedger.forEach(function(d) {
     deductionsRows += "<tr><td>" + d.category + "</td><td>" + d.description + "</td><td>PHP " + d.amount.toFixed(2) + "</td></tr>";
   });
-
+  
   var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
   var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
   var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-
-  reportArea.innerHTML =
-    "<h2>Silogan ni Joy Daily Financial Summary</h2>" +
-    "<p><strong>Date:</strong> " + new Date().toLocaleDateString() + "</p>" +
+  
+  return "<h2>Silogan ni Joy Daily Financial Summary</h2>" +
+    "<p><strong>Date: </strong>" + new Date().toLocaleDateString() + "</p>" +
     "<h3>Financial Metrics</h3>" +
     "<table>" +
     "<tr><th>Gross Sales</th><td>PHP " + dailyReport.totalSales.toFixed(2) + "</td></tr>" +
@@ -1291,7 +1221,12 @@ function triggerReportPDFGeneration() {
     "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
     "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
     "</table>";
+}
 
+function printFinancialSummaryWeb() {
+  var reportArea = document.getElementById("report-print-area");
+  reportArea.innerHTML = buildReportHTMLString();
+  
   document.body.classList.add("print-mode-report");
   setTimeout(function() {
     try {
@@ -1301,8 +1236,60 @@ function triggerReportPDFGeneration() {
     }
     setTimeout(function() {
       document.body.classList.remove("print-mode-report");
-    }, 2000);
-  }, 1500);
+    }, 1000);
+  }, 500);
+}
+
+function printFinancialSummaryRawBT() {
+  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
+  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
+  
+  var summaryText = "";
+  summaryText += "SILOGAN NI JOY\n";
+  summaryText += "DAILY FINANCIAL SUMMARY\n";
+  summaryText += "---------\n";
+  summaryText += "Date: " + new Date().toLocaleDateString() + "\n";
+  summaryText += "Time: " + new Date().toLocaleTimeString() + "\n";
+  summaryText += "--------\n";
+  summaryText += "FINANCIAL METRICS:\n";
+  summaryText += "Gross Sales: PHP " + dailyReport.totalSales.toFixed(2) + "\n";
+  summaryText += "Cash Sales: PHP " + dailyReport.cashSales.toFixed(2) + "\n";
+  summaryText += "Online Sales: PHP " + dailyReport.onlineSales.toFixed(2) + "\n";
+  summaryText += "Deductions: PHP " + totalDeductions.toFixed(2) + "\n";
+  summaryText += "-----\n";
+  summaryText += "NET CASH ON HAND:\n";
+  summaryText += "PHP " + netCash.toFixed(2) + "\n";
+  summaryText += "------\n";
+  summaryText += "ITEMS SOLD:\n";
+  var itemsKeys = Object.keys(dailyReport.itemsSold);
+  if (itemsKeys.length === 0) {
+    summaryText += "No items sold today.\n";
+  } else {
+    itemsKeys.forEach(function(key) {
+      summaryText += dailyReport.itemsSold[key] + "x " + key + "\n";
+    });
+  }
+  summaryText += "---\n";
+  summaryText += "DEDUCTIONS LEDGER:\n";
+  if (itemizedDeductionsLedger.length === 0) {
+    summaryText += "No deductions recorded.\n";
+  } else {
+    itemizedDeductionsLedger.forEach(function(d) {
+      summaryText += "[" + d.category + "]\n";
+      summaryText += (d.description || "Expenses") + "\n";
+      summaryText += " PHP " + d.amount.toFixed(2) + "\n";
+    });
+  }
+  summaryText += "-----\n";
+  summaryText += "End of Report\n\n\n\n";
+  
+  try {
+    window.location.href = "rawbt:" + encodeURIComponent(summaryText);
+  } catch (err) {
+    console.error("Direct report print failed", err);
+    alert("Could not connect directly to RawBT app.");
+  }
 }
 
 function resetEntireDailyMasterReport() {
@@ -1312,11 +1299,9 @@ function resetEntireDailyMasterReport() {
   kitchenPendingQueue = [];
   updateFinancialUI();
   renderKitchenQueueUI();
-  refreshInventoryTableUI();
+  refreshInventoryTableUI(currentInvFilter);
   saveState();
 }
 </script>
 </body>
 </html>
-
-
