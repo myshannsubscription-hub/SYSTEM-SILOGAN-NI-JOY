@@ -514,6 +514,7 @@ var silogItems = [
 ];
 
 var bbqItems = [
+  { name: "PARES", price: 99 },
   { name: "PORK BBQ", price: 35 },
   { name: "CHICKEN INASAL", price: 120 }
 ];
@@ -645,7 +646,7 @@ function populateSystemMasterCatalogArrays() {
   itemIndexCounter = 1;
   
   silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
-  bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
+  bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ and Others", defaultPrice: i.price }); });
   extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
   drinksItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price }); });
 
