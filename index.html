@@ -4,8 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Silogan ni Joy POS</title>
-<!-- html2pdf library for reliable PDF saving -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --red: #bc1c24;
@@ -436,7 +434,6 @@ button.secondary-btn:hover { background: #444; }
   
   <div style="margin-top:30px; display: flex; gap:15px; flex-wrap: wrap;">
     <button type="button" class="action-btn" style="background: #28a745;" onclick="printFinancialSummaryRawBT()">Print Summary (RawBT)</button>
-    <button type="button" class="action-btn" style="background: #17a2b8;" onclick="downloadFinancialSummaryPDF()">Download PDF File</button>
     <button type="button" class="action-btn" style="background: #6f42c1;" onclick="printFinancialSummaryWeb()">Standard Web Print</button>
     <button type="button" class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
   </div>
@@ -448,7 +445,7 @@ button.secondary-btn:hover { background: #444; }
   
   <!-- Sub Navigation strictly mapped to requested Classifications -->
   <div class="inventory-sub-nav">
-    <button id="sub-tab-products" class="action-btn active-sub-tab" onclick="switchInventorySubTab('products')">🛒 PRODUCTS<br><small>(Silogs, BBQ, & Menu Items)</small></button>
+    <button id="sub-tab-products" class="action-btn active-sub-tab" onclick="switchInventorySubTab('products')">🛒 PRODUCTS<br><small>(Silogs, BBQ, & Others)</small></button>
     <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">🥩 INGREDIENTS<br><small>(List items, Raw Supplies, Drinks)</small></button>
   </div>
 
@@ -518,38 +515,16 @@ var bbqItems = [
   { name: "CHICKEN INASAL", price: 120 }
 ];
 
-var extrasItems = [
-  { name: "EGG", price: 15 },
-  { name: "PLAIN RICE", price: 20 },
-  { name: "FRIED RICE", price: 25 },
-  { name: "FRIES BBQ", price: 50},
-  { name: "FRIES CHEESE", price: 50 },
-  { name: "FRIES SOUR CREAM", price: 50 },
-  { name: "TAKE-OUT (STYRO)", price: 5 },
-  { name: "TAKE-OUT (BOX)", price: 10 }
+var othersItems = [
+  { name: "PARES", price: 99 }
 ];
 
-var drinksItems = [
-  { name: "COKE", price: 30 },
-  { name: "MOUNTAIN DEW", price: 30 },
-  { name: "SODA GREEN APPLE", price: 49 },
-  { name: "SODA BLUEBERRY", price: 49 },
-  { name: "SODA LEMON", price: 49},
-  { name: "SODA MANGO", price: 49},
-  { name: "SODA WATERMELON", price: 49},
-  { name: "SODA - STRAWBERRY", price: 49},
-  { name: "SODA LYCHEE", price: 49 },
-  { name: "PALAMIG BLACK GULAMAN", price: 25 },
-  { name: "PALAMIG BLUE LEMONADE", price: 25 },
-  { name: "PALAMIG CUCUMBER LEMONADE", price: 25 },
-  { name: "MINERAL WATER", price: 25 }
-];
-
-/* Raw Ingredients Database (Sourced exclusively from SILOGAN DAILY INVENTORY LOG.pdf) */
+/* Raw Ingredients Database */
 var rawIngredientsList = [
   // MAIN INGREDIENTS
   { name: "Rice (kg)", category: "Main Ingredients" },
   { name: "Eggs (pcs)", category: "Main Ingredients" },
+  { name: "Egg", category: "Main Ingredients" },
   { name: "Ham (packs)", category: "Main Ingredients" },
   { name: "Hotdog (packs)", category: "Main Ingredients" },
   { name: "Skinless (packs)", category: "Main Ingredients" },
@@ -591,8 +566,11 @@ var rawIngredientsList = [
   { name: "Sour Cream Powder", category: "Fries & Snacks" },
   // DRINKS (Ingredients & Syrups)
   { name: "Coke", category: "Drinks Ingredients" },
-  { name: "Mountain Dew", category: "Drinks Ingredients" },
+  { name: "Coke Zero", category: "Drinks Ingredients" },
+  { name: "Sprite", category: "Drinks Ingredients" },
+  { name: "Water", category: "Drinks Ingredients" },
   { name: "Mineral Water", category: "Drinks Ingredients" },
+  { name: "Mountain Dew", category: "Drinks Ingredients" },
   { name: "Green Apple Syrup", category: "Drinks Ingredients" },
   { name: "Blueberry Syrup", category: "Drinks Ingredients" },
   { name: "Mango Syrup", category: "Drinks Ingredients" },
@@ -622,7 +600,7 @@ var itemIndexCounter = 1;
 var ingredientIndexCounter = 1;
 
 var productsDatabaseStore = {}; // Maps to POS Menu Items
-var ingredientsDatabaseStore = {}; // Maps to Raw List from PDF
+var ingredientsDatabaseStore = {}; // Maps to Raw List
 var activeInventoryTab = 'products'; // 'products' or 'ingredients'
 var currentInvFilter = 'all';
 
@@ -646,8 +624,7 @@ function populateSystemMasterCatalogArrays() {
   
   silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
   bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
-  extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
-  drinksItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price }); });
+  othersItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Others", defaultPrice: i.price }); });
 
   systemIngredientsCatalog = [];
   ingredientIndexCounter = 1;
@@ -668,7 +645,7 @@ function initializeInventoryStorageToZero() {
   });
 }
 
-/* State Persistence - NOTE: Changed Key to _v3 to prevent browser caching */
+/* State Persistence - Bumped to v4 to clear cache based on structural changes */
 function saveState() {
   var startCashEl = document.getElementById("starting-cash-input");
   var discSelEl = document.getElementById("pos-discount-select");
@@ -686,7 +663,7 @@ function saveState() {
     paymentMethod: payMethEl ? payMethEl.value : "cash"
   };
   try {
-    localStorage.setItem("siloganNiJoy_State_v3", JSON.stringify(state));
+    localStorage.setItem("siloganNiJoy_State_v4", JSON.stringify(state));
   } catch (e) {
     console.error("Local Storage write blocked", e);
   }
@@ -694,7 +671,7 @@ function saveState() {
 
 function loadState() {
   try {
-    var saved = localStorage.getItem("siloganNiJoy_State_v3");
+    var saved = localStorage.getItem("siloganNiJoy_State_v4");
     if (saved) {
       var state = JSON.parse(saved);
       if (state.productsDatabaseStore) {
@@ -1244,24 +1221,6 @@ function buildReportHTMLString() {
     "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
     "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
     "</table>";
-}
-
-function downloadFinancialSummaryPDF() {
-  var reportArea = document.getElementById("report-print-area");
-  reportArea.innerHTML = buildReportHTMLString();
-  reportArea.style.display = "block";
-  
-  var opt = {
-    margin:       0.5,
-    filename:     'Financial_Summary_' + new Date().toISOString().slice(0,10) + '.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-  };
-  
-  html2pdf().set(opt).from(reportArea).save().then(function() {
-    reportArea.style.display = "none";
-  });
 }
 
 function printFinancialSummaryWeb() {
