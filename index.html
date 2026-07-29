@@ -221,20 +221,29 @@ button.secondary-btn:hover { background: #444; }
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 10px;
+  border-bottom: 3px solid #ccc;
+  padding-bottom: 15px;
 }
 .inventory-sub-nav button {
-  width: auto;
-  padding: 8px 16px;
+  flex: 1;
+  padding: 15px;
   margin: 0;
+  font-size: 16px;
   background: #e0e0e0;
   color: #333;
-  border-radius: 4px 4px 0 0;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+.inventory-sub-nav button:hover {
+  background: #d4d4d4;
 }
 .inventory-sub-nav button.active-sub-tab {
   background: var(--red);
   color: white;
+  border-color: var(--dark);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
 /* Print areas hidden by default */
@@ -294,7 +303,6 @@ button.secondary-btn:hover { background: #444; }
 
 <!-- POS View -->
 <div id="pos-section" class="app-section active-section">
-  <!-- (Same as previous POS view) -->
   <div class="grid-2col">
     <div>
       <h3>Interactive Menu Layout</h3>
@@ -351,7 +359,6 @@ button.secondary-btn:hover { background: #444; }
 
 <!-- Financial Summary View -->
 <div id="financials-section" class="app-section">
-  <!-- (Same as previous Financial Summary View) -->
   <h3>Daily Business Metrics Summary Board</h3>
   <div style="background:#fdfbf7; padding: 15px; border-radius: 6px; margin-bottom:20px; border: 1px solid #e6dfcc;">
     <label style="font-weight:bold; font-size:14px;">Set Shift Baseline Vault Reserve (Starting Cash): </label>
@@ -439,10 +446,10 @@ button.secondary-btn:hover { background: #444; }
 <div id="inventory-section" class="app-section">
   <h3>Master System Stock Controller</h3>
   
-  <!-- Sub Navigation for Silogs vs Ingredients -->
+  <!-- Sub Navigation strictly mapped to requested Classifications -->
   <div class="inventory-sub-nav">
-    <button id="sub-tab-menu" class="action-btn active-sub-tab" onclick="switchInventorySubTab('menu')">Silogs & Menu Items</button>
-    <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">Raw Ingredients & Supplies</button>
+    <button id="sub-tab-products" class="action-btn active-sub-tab" onclick="switchInventorySubTab('products')">🛒 PRODUCTS<br><small>(Silogs, BBQ, & Menu Items)</small></button>
+    <button id="sub-tab-ingredients" class="action-btn" onclick="switchInventorySubTab('ingredients')">🥩 INGREDIENTS<br><small>(List items, Raw Supplies, Drinks)</small></button>
   </div>
 
   <div class="filter-row">
@@ -455,7 +462,7 @@ button.secondary-btn:hover { background: #444; }
     <div>
       <div style="max-height:500px; overflow-y:auto;">
         <table class="master-table">
-          <thead><tr><th><span id="inv-col-header">Menu Item ID</span> & Name</th><th>Beginning Qty</th><th>Changes (+/-)</th><th>Ending Inventory</th><th>Status Metric</th></tr></thead>
+          <thead><tr><th><span id="inv-col-header">Product ID</span> & Name</th><th>Beginning Qty</th><th>Changes (+/-)</th><th>Ending Inventory</th><th>Status Metric</th></tr></thead>
           <tbody id="inventory-table-body"></tbody>
         </table>
       </div>
@@ -538,7 +545,7 @@ var drinksItems = [
   { name: "MINERAL WATER", price: 25 }
 ];
 
-/* Raw Ingredients Database (Sourced from SILOGAN DAILY INVENTORY LOG) */
+/* Raw Ingredients Database (Sourced exclusively from SILOGAN DAILY INVENTORY LOG.pdf) */
 var rawIngredientsList = [
   // MAIN INGREDIENTS
   { name: "Rice (kg)", category: "Main Ingredients" },
@@ -582,7 +589,7 @@ var rawIngredientsList = [
   { name: "Cheese Powder", category: "Fries & Snacks" },
   { name: "BBQ Powder", category: "Fries & Snacks" },
   { name: "Sour Cream Powder", category: "Fries & Snacks" },
-  // DRINKS
+  // DRINKS (Ingredients & Syrups)
   { name: "Coke", category: "Drinks Ingredients" },
   { name: "Mountain Dew", category: "Drinks Ingredients" },
   { name: "Mineral Water", category: "Drinks Ingredients" },
@@ -614,9 +621,9 @@ var systemIngredientsCatalog = [];
 var itemIndexCounter = 1;
 var ingredientIndexCounter = 1;
 
-var inventoryDatabaseStore = {}; // For Menu Silogs
-var ingredientsDatabaseStore = {}; // For Raw Ingredients
-var activeInventoryTab = 'menu'; // Tracks which sub-tab is open ('menu' or 'ingredients')
+var productsDatabaseStore = {}; // Maps to POS Menu Items
+var ingredientsDatabaseStore = {}; // Maps to Raw List from PDF
+var activeInventoryTab = 'products'; // 'products' or 'ingredients'
 var currentInvFilter = 'all';
 
 var activeBasketArray = [];
@@ -637,10 +644,10 @@ function populateSystemMasterCatalogArrays() {
   systemMenuCatalog = [];
   itemIndexCounter = 1;
   
-  silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "SLG" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
-  bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "BBQ" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
-  extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "EXT" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
-  drinksItems.forEach(function(i) { systemMenuCatalog.push({ id: "DRKS" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price }); });
+  silogItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Silog Menu", defaultPrice: i.price }); });
+  bbqItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "BBQ", defaultPrice: i.price }); });
+  extrasItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Extras", defaultPrice: i.price }); });
+  drinksItems.forEach(function(i) { systemMenuCatalog.push({ id: "PROD" + itemIndexCounter++, name: i.name, category: "Drinks", defaultPrice: i.price }); });
 
   systemIngredientsCatalog = [];
   ingredientIndexCounter = 1;
@@ -650,9 +657,9 @@ function populateSystemMasterCatalogArrays() {
 }
 
 function initializeInventoryStorageToZero() {
-  inventoryDatabaseStore = {};
+  productsDatabaseStore = {};
   systemMenuCatalog.forEach(function(item) {
-    inventoryDatabaseStore[item.id] = { name: item.name, beginningQty: 0, changesQty: 0, endingQty: 0 };
+    productsDatabaseStore[item.id] = { name: item.name, category: item.category, beginningQty: 0, changesQty: 0, endingQty: 0 };
   });
 
   ingredientsDatabaseStore = {};
@@ -661,14 +668,14 @@ function initializeInventoryStorageToZero() {
   });
 }
 
-/* State Persistence */
+/* State Persistence - NOTE: Changed Key to _v3 to prevent browser caching */
 function saveState() {
   var startCashEl = document.getElementById("starting-cash-input");
   var discSelEl = document.getElementById("pos-discount-select");
   var payMethEl = document.getElementById("pos-payment-method");
   
   var state = {
-    inventoryDatabaseStore: inventoryDatabaseStore,
+    productsDatabaseStore: productsDatabaseStore,
     ingredientsDatabaseStore: ingredientsDatabaseStore,
     activeBasketArray: activeBasketArray,
     kitchenPendingQueue: kitchenPendingQueue,
@@ -679,7 +686,7 @@ function saveState() {
     paymentMethod: payMethEl ? payMethEl.value : "cash"
   };
   try {
-    localStorage.setItem("siloganNiJoy_State_v2", JSON.stringify(state));
+    localStorage.setItem("siloganNiJoy_State_v3", JSON.stringify(state));
   } catch (e) {
     console.error("Local Storage write blocked", e);
   }
@@ -687,14 +694,13 @@ function saveState() {
 
 function loadState() {
   try {
-    var saved = localStorage.getItem("siloganNiJoy_State_v2");
+    var saved = localStorage.getItem("siloganNiJoy_State_v3");
     if (saved) {
       var state = JSON.parse(saved);
-      if (state.inventoryDatabaseStore) {
-        inventoryDatabaseStore = state.inventoryDatabaseStore;
+      if (state.productsDatabaseStore) {
+        productsDatabaseStore = state.productsDatabaseStore;
       }
       if (state.ingredientsDatabaseStore) {
-        // Merge with defaults in case of new items
         Object.keys(state.ingredientsDatabaseStore).forEach(function(k) {
           if (ingredientsDatabaseStore[k]) {
             ingredientsDatabaseStore[k] = state.ingredientsDatabaseStore[k];
@@ -750,22 +756,17 @@ function repopulateMasterDropdownSelections() {
   var inventorySelect = document.getElementById("inventory-target-select");
   inventorySelect.innerHTML = "";
   
-  if (activeInventoryTab === 'menu') {
-    systemMenuCatalog.forEach(function(element) {
-      inventorySelect.add(new Option(element.name, element.id));
-    });
-  } else {
-    // Group ingredients by category in the dropdown for better readability
-    var categories = {};
-    systemIngredientsCatalog.forEach(function(item) {
-      if (!categories[item.category]) {
-        categories[item.category] = document.createElement("optgroup");
-        categories[item.category].label = item.category.toUpperCase();
-        inventorySelect.appendChild(categories[item.category]);
-      }
-      categories[item.category].appendChild(new Option(item.name, item.id));
-    });
-  }
+  var targetCatalog = (activeInventoryTab === 'products') ? systemMenuCatalog : systemIngredientsCatalog;
+  var categories = {};
+  
+  targetCatalog.forEach(function(item) {
+    if (!categories[item.category]) {
+      categories[item.category] = document.createElement("optgroup");
+      categories[item.category].label = item.category.toUpperCase();
+      inventorySelect.appendChild(categories[item.category]);
+    }
+    categories[item.category].appendChild(new Option(item.name, item.id));
+  });
 }
 
 function refreshAllUI() {
@@ -809,12 +810,10 @@ function renderInteractivePOSMenuUI() {
 function addItemToOrderBasket(menuItemId) {
   var catalogMatch = systemMenuCatalog.find(function(i) { return i.id === menuItemId; });
   if (!catalogMatch) return;
-  var verifiedInv = inventoryDatabaseStore[menuItemId];
   
-  if (catalogMatch.category !== 'Drinks' && catalogMatch.category !== 'Extras') {
-      if (verifiedInv && verifiedInv.endingQty <= 0) {
-        if (!confirm("STOCK WARNING: \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
-      }
+  var verifiedInv = productsDatabaseStore[menuItemId];
+  if (verifiedInv && verifiedInv.endingQty <= 0) {
+    if (!confirm("STOCK WARNING: Product \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
   }
 
   var existingMatch = activeBasketArray.find(function(entry) { return entry.id === menuItemId; });
@@ -944,16 +943,13 @@ function executePOSCheckoutOrder() {
   receiptText += "------\n";
   receiptText += "Thank you for dining with us!\n\n\n\n";
 
-  // Standard Web Print Backup for Receipt
   var receiptPrintEl = document.getElementById("receipt-print-area");
   receiptPrintEl.innerHTML = "<pre>" + receiptText + "</pre>";
 
-  // Deductions and Daily Reports
+  // Deductions from Products Inventory and Daily Reports
   activeBasketArray.forEach(function(row) {
-    if (row.category !== 'Drinks' && row.category !== 'Extras') {
-        if (inventoryDatabaseStore[row.id]) {
-          inventoryDatabaseStore[row.id].endingQty = Math.max(0, inventoryDatabaseStore[row.id].endingQty - row.qty);
-        }
+    if (productsDatabaseStore[row.id]) {
+      productsDatabaseStore[row.id].endingQty = Math.max(0, productsDatabaseStore[row.id].endingQty - row.qty);
     }
     dailyReport.itemsSold[row.name] = (dailyReport.itemsSold[row.name] || 0) + row.qty;
   });
@@ -1126,13 +1122,13 @@ function refreshDeductionsUI() {
 function switchInventorySubTab(tabMode) {
   activeInventoryTab = tabMode;
   
-  // Update Buttons
-  document.getElementById("sub-tab-menu").classList.remove("active-sub-tab");
+  // Update Buttons UI mapping
+  document.getElementById("sub-tab-products").classList.remove("active-sub-tab");
   document.getElementById("sub-tab-ingredients").classList.remove("active-sub-tab");
   
-  if (tabMode === 'menu') {
-    document.getElementById("sub-tab-menu").classList.add("active-sub-tab");
-    document.getElementById("inv-col-header").innerText = "Menu Item ID";
+  if (tabMode === 'products') {
+    document.getElementById("sub-tab-products").classList.add("active-sub-tab");
+    document.getElementById("inv-col-header").innerText = "Product ID";
   } else {
     document.getElementById("sub-tab-ingredients").classList.add("active-sub-tab");
     document.getElementById("inv-col-header").innerText = "Ingredient ID";
@@ -1160,8 +1156,7 @@ function refreshInventoryTableUI(filter) {
   var tbody = document.getElementById("inventory-table-body");
   tbody.innerHTML = "";
   
-  // Decide which database to draw from based on the active sub-tab
-  var targetDatabase = (activeInventoryTab === 'menu') ? inventoryDatabaseStore : ingredientsDatabaseStore;
+  var targetDatabase = (activeInventoryTab === 'products') ? productsDatabaseStore : ingredientsDatabaseStore;
   var ids = Object.keys(targetDatabase);
   
   if (ids.length === 0) {
@@ -1178,10 +1173,9 @@ function refreshInventoryTableUI(filter) {
       (row.endingQty < 10 ? '<span class="badge bg-warning">LOW</span>' : '<span class="badge bg-success">OK</span>');
     var tr = document.createElement("tr");
     
-    // Add category for ingredients mode so they are easier to read
-    var displayName = (activeInventoryTab === 'ingredients') ? `[${row.category}] ${row.name}` : row.name;
+    var displayName = `[${row.category}] ${row.name}`;
 
-    tr.innerHTML = "<td>" + id + " / " + displayName + "</td>" +
+    tr.innerHTML = "<td><strong>" + id + "</strong><br>" + displayName + "</td>" +
       "<td>" + row.beginningQty + "</td>" +
       "<td>" + (row.changesQty >= 0 ? "+" + row.changesQty : row.changesQty) + "</td>" +
       "<td>" + row.endingQty + "</td>" +
@@ -1197,7 +1191,7 @@ function executeSmartStockControllerUpdate() {
   
   if (!target) return alert("Select inventory row");
   
-  var targetDatabase = (activeInventoryTab === 'menu') ? inventoryDatabaseStore : ingredientsDatabaseStore;
+  var targetDatabase = (activeInventoryTab === 'products') ? productsDatabaseStore : ingredientsDatabaseStore;
   
   if (mode === "beginning") {
     targetDatabase[target].beginningQty = qty;
