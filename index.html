@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Silogan ni Joy POS</title>
+<!-- html2pdf library for reliable PDF saving -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --red: #bc1c24;
@@ -217,44 +219,41 @@ button.secondary-btn:hover { background: #444; }
 /* Print areas hidden by default */
 #receipt-print-area, #report-print-area { display: none; }
 
-/* Print rules */
+/* Print rules - FIXED to hide everything else properly without breaking the DOM */
 @media print {
-  body { display: none !important; }
-  body.print-mode-receipt #receipt-print-area {
-    display: block !important;
-    visibility: visible !important;
-    position: absolute !important;
-    left: 0 !important; top: 0 !important;
-    width: 70mm !important; max-width: 70mm !important;
-    padding: 2mm !important;
-    font-family: monospace !important;
-    box-sizing: border-box !important;
-    background: #fff !important; color: #000 !important;
-    font-size: 11px !important;
-  }
-  body.print-mode-receipt receipt-line {
-    border-top: 1px dashed #000 !important;
-    margin: 5px 0 !important; width: 100% !important; display: block !important;
-  }
-  body.print-mode-receipt receipt-row {
-    display: flex !important; justify-content: space-between !important; width: 100% !important; gap: 4px !important;
-  }
-  body.print-mode-receipt.center-text { text-align: center !important; width: 100% !important; display: block !important; }
+  body * { visibility: hidden; }
   
+  /* Report Print Mode */
+  body.print-mode-report #report-print-area, 
+  body.print-mode-report #report-print-area * {
+    visibility: visible;
+  }
   body.print-mode-report #report-print-area {
     display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    position: absolute !important;
-    left: 0 !important; top: 0 !important;
-    padding: 10mm !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    box-sizing: border-box !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 15px;
+    background: white;
   }
-  body.print-mode-report table { width: 100% !important; border-collapse: collapse !important; }
-  body.print-mode-report th { background-color: var(--dark) !important; color: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  body.print-mode-report td, body.print-mode-report th { border: 1px solid #ddd !important; padding: 8px !important; }
+  body.print-mode-report table { width: 100%; border-collapse: collapse; }
+  body.print-mode-report th, body.print-mode-report td { border: 1px solid #000; padding: 8px; text-align: left; }
+
+  /* Receipt Print Mode */
+  body.print-mode-receipt #receipt-print-area,
+  body.print-mode-receipt #receipt-print-area * {
+    visibility: visible;
+  }
+  body.print-mode-receipt #receipt-print-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    font-family: monospace;
+    font-size: 12px;
+  }
 }
 </style>
 </head>
@@ -316,7 +315,7 @@ button.secondary-btn:hover { background: #444; }
         </div>
       </div>
       
-      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip & Print</button>
+      <button class="action-btn" style="margin-top:10px;" onclick="executePOSCheckoutOrder()">Checkout / Clear Order Slip</button>
       <button class="action-btn secondary-btn" onclick="clearActiveBasket()">Cancel Order</button>
     </div>
   </div>
@@ -407,7 +406,8 @@ button.secondary-btn:hover { background: #444; }
   
   <div style="margin-top:30px; display: flex; gap:15px; flex-wrap: wrap;">
     <button type="button" class="action-btn" style="background: #28a745;" onclick="printFinancialSummaryRawBT()">Print Summary (RawBT)</button>
-    <button type="button" class="action-btn" style="background: #17a2b8;" onclick="downloadFinancialSummaryPDF()">Print / Download PDF</button>
+    <button type="button" class="action-btn" style="background: #17a2b8;" onclick="downloadFinancialSummaryPDF()">Download PDF File</button>
+    <button type="button" class="action-btn" style="background: #6f42c1;" onclick="printFinancialSummaryWeb()">Standard Web Print</button>
     <button type="button" class="action-btn secondary-btn" style="background:#6c757d;" onclick="resetEntireDailyMasterReport()">Reset Financial Summary Data</button>
   </div>
 </div>
@@ -480,7 +480,6 @@ var bbqItems = [
   { name: "CHICKEN INASAL", price: 120 }
 ];
 
-/* EGG is now strictly here, nowhere else */
 var extrasItems = [
   { name: "EGG", price: 15 },
   { name: "PLAIN RICE", price: 20 },
@@ -689,7 +688,6 @@ function addItemToOrderBasket(menuItemId) {
   if (!catalogMatch) return;
   var verifiedInv = inventoryDatabaseStore[menuItemId];
   
-  // Only check stock for main items, not drinks or extras (like Egg)
   if (catalogMatch.category !== 'Drinks' && catalogMatch.category !== 'Extras') {
       if (verifiedInv && verifiedInv.endingQty <= 0) {
         if (!confirm("STOCK WARNING: \"" + catalogMatch.name + "\" is at 0 units. Override and add anyway?")) return;
@@ -823,16 +821,17 @@ function executePOSCheckoutOrder() {
   receiptText += "------\n";
   receiptText += "Thank you for dining with us!\n\n\n\n";
 
-  // Financial and Stock Deductions Logic
+  // Standard Web Print Backup for Receipt
+  var receiptPrintEl = document.getElementById("receipt-print-area");
+  receiptPrintEl.innerHTML = "<pre>" + receiptText + "</pre>";
+
+  // Deductions and Daily Reports
   activeBasketArray.forEach(function(row) {
-    // Only deduct inventory for main courses (Not drinks, not extras like Egg)
     if (row.category !== 'Drinks' && row.category !== 'Extras') {
         if (inventoryDatabaseStore[row.id]) {
           inventoryDatabaseStore[row.id].endingQty = Math.max(0, inventoryDatabaseStore[row.id].endingQty - row.qty);
         }
     }
-    
-    // Always add to summarized order list!
     dailyReport.itemsSold[row.name] = (dailyReport.itemsSold[row.name] || 0) + row.qty;
   });
   
@@ -860,6 +859,7 @@ function executePOSCheckoutOrder() {
   updateFinancialUI();
   saveState();
 
+  // Try RawBT, fallback to standard print if it throws an error in non-mobile
   try {
     window.location.href = "rawbt:" + encodeURIComponent(receiptText);
   } catch (err) {
@@ -1060,7 +1060,82 @@ function executeSmartStockControllerUpdate() {
   saveState();
 }
 
-/* RawBT & PDF Reports */
+/* Reporting & Print Generators */
+function buildReportHTMLString() {
+  var itemsRows = "";
+  Object.keys(dailyReport.itemsSold).forEach(function(key) {
+    itemsRows += "<tr><td>" + key + "</td><td>" + dailyReport.itemsSold[key] + "</td></tr>";
+  });
+  
+  var deductionsRows = "";
+  itemizedDeductionsLedger.forEach(function(d) {
+    deductionsRows += "<tr><td>" + d.category + "</td><td>" + d.description + "</td><td>PHP " + d.amount.toFixed(2) + "</td></tr>";
+  });
+  
+  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
+  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
+  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
+  
+  return "<h2>Silogan ni Joy Daily Financial Summary</h2>" +
+    "<p><strong>Date: </strong>" + new Date().toLocaleDateString() + "</p>" +
+    "<h3>Financial Metrics</h3>" +
+    "<table>" +
+    "<tr><th>Gross Sales</th><td>PHP " + dailyReport.totalSales.toFixed(2) + "</td></tr>" +
+    "<tr><th>Cash Sales</th><td>PHP " + dailyReport.cashSales.toFixed(2) + "</td></tr>" +
+    "<tr><th>Online Sales</th><td>PHP " + dailyReport.onlineSales.toFixed(2) + "</td></tr>" +
+    "<tr><th>Total Deductions</th><td>PHP " + totalDeductions.toFixed(2) + "</td></tr>" +
+    "<tr><th>Net Cash on Hand</th><td>PHP " + netCash.toFixed(2) + "</td></tr>" +
+    "<tr><th>Transactions</th><td>" + dailyReport.orderCount + "</td></tr>" +
+    "</table>" +
+    "<h3>Items Sold</h3>" +
+    "<table>" +
+    "<thead><tr><th>Item</th><th>Qty</th></tr></thead>" +
+    "<tbody>" + (itemsRows || "<tr><td colspan='2'>No items sold</td></tr>") + "</tbody>" +
+    "</table>" +
+    "<h3>Ledger Deductions</h3>" +
+    "<table>" +
+    "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
+    "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
+    "</table>";
+}
+
+function downloadFinancialSummaryPDF() {
+  var reportArea = document.getElementById("report-print-area");
+  reportArea.innerHTML = buildReportHTMLString();
+  
+  // Make it briefly visible for html2pdf rendering
+  reportArea.style.display = "block";
+  
+  var opt = {
+    margin:       0.5,
+    filename:     'Financial_Summary_' + new Date().toISOString().slice(0,10) + '.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+  
+  html2pdf().set(opt).from(reportArea).save().then(function() {
+    reportArea.style.display = "none";
+  });
+}
+
+function printFinancialSummaryWeb() {
+  var reportArea = document.getElementById("report-print-area");
+  reportArea.innerHTML = buildReportHTMLString();
+  
+  document.body.classList.add("print-mode-report");
+  setTimeout(function() {
+    try {
+      window.print();
+    } catch (e) {
+      console.error("Print failed", e);
+    }
+    setTimeout(function() {
+      document.body.classList.remove("print-mode-report");
+    }, 1000);
+  }, 500);
+}
+
 function printFinancialSummaryRawBT() {
   var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
   var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
@@ -1111,62 +1186,6 @@ function printFinancialSummaryRawBT() {
     console.error("Direct report print failed", err);
     alert("Could not connect directly to RawBT app.");
   }
-}
-
-function downloadFinancialSummaryPDF() {
-  triggerReportPDFGeneration();
-}
-
-function triggerReportPDFGeneration() {
-  var reportArea = document.getElementById("report-print-area");
-  var itemsRows = "";
-  Object.keys(dailyReport.itemsSold).forEach(function(key) {
-    itemsRows += "<tr><td>" + key + "</td><td>" + dailyReport.itemsSold[key] + "</td></tr>";
-  });
-  
-  var deductionsRows = "";
-  itemizedDeductionsLedger.forEach(function(d) {
-    deductionsRows += "<tr><td>" + d.category + "</td><td>" + d.description + "</td><td>PHP " + d.amount.toFixed(2) + "</td></tr>";
-  });
-  
-  var totalDeductions = itemizedDeductionsLedger.reduce(function(s, r) { return s + (r.amount || 0); }, 0);
-  var startingCash = parseFloat(document.getElementById("starting-cash-input").value) || 0;
-  var netCash = startingCash + dailyReport.cashSales - totalDeductions;
-  
-  reportArea.innerHTML =
-    "<h2>Silogan ni Joy Daily Financial Summary</h2>" +
-    "<p><strong>Date: </strong>" + new Date().toLocaleDateString() + "</p>" +
-    "<h3>Financial Metrics</h3>" +
-    "<table>" +
-    "<tr><th>Gross Sales</th><td>PHP " + dailyReport.totalSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Cash Sales</th><td>PHP " + dailyReport.cashSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Online Sales</th><td>PHP " + dailyReport.onlineSales.toFixed(2) + "</td></tr>" +
-    "<tr><th>Total Deductions</th><td>PHP " + totalDeductions.toFixed(2) + "</td></tr>" +
-    "<tr><th>Net Cash on Hand</th><td>PHP " + netCash.toFixed(2) + "</td></tr>" +
-    "<tr><th>Transactions</th><td>" + dailyReport.orderCount + "</td></tr>" +
-    "</table>" +
-    "<h3>Items Sold</h3>" +
-    "<table>" +
-    "<thead><tr><th>Item</th><th>Qty</th></tr></thead>" +
-    "<tbody>" + (itemsRows || "<tr><td colspan='2'>No items sold</td></tr>") + "</tbody>" +
-    "</table>" +
-    "<h3>Ledger Deductions</h3>" +
-    "<table>" +
-    "<thead><tr><th>Category</th><th>Description</th><th>Amount</th></tr></thead>" +
-    "<tbody>" + (deductionsRows || "<tr><td colspan='3'>No deductions</td></tr>") + "</tbody>" +
-    "</table>";
-    
-  document.body.classList.add("print-mode-report");
-  setTimeout(function() {
-    try {
-      window.print();
-    } catch (e) {
-      console.error("Print failed", e);
-    }
-    setTimeout(function() {
-      document.body.classList.remove("print-mode-report");
-    }, 2000);
-  }, 1500);
 }
 
 function resetEntireDailyMasterReport() {
