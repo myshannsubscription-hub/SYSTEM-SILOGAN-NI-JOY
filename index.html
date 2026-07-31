@@ -704,9 +704,13 @@ function loadState() {
     var saved = localStorage.getItem("siloganNiJoy_State_v3");
     if (saved) {
       var state = JSON.parse(saved);
-      if (state.productsDatabaseStore) {
-        productsDatabaseStore = state.productsDatabaseStore;
-      }
+     if (state.productsDatabaseStore) {
+    Object.keys(state.productsDatabaseStore).forEach(function(k) {
+        if (productsDatabaseStore[k]) {
+            productsDatabaseStore[k] = state.productsDatabaseStore[k];
+        }
+    });
+}
       if (state.ingredientsDatabaseStore) {
         Object.keys(state.ingredientsDatabaseStore).forEach(function(k) {
           if (ingredientsDatabaseStore[k]) {
